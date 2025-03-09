@@ -12,5 +12,5 @@ terraform_setup:
     - terraform output -raw ec2_public_ip > ec2_public_ip.txt
   artifacts:
     paths:
-      - ec2_public_ip.txt
+      - terraform/ec2_public_ip.txt
   when: manual
