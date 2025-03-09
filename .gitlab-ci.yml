@@ -1,0 +1,16 @@
+stages:
+ - terraform
+
+terraform_setup:
+  stage: terraform
+  image: hashicorp/terraform:1.5
+  script:
+    - cd terraform
+    - terraform init
+    - terraform plan
+    - terraform apply -auto-approve
+    - terraform output -raw ec2_public_ip > ec2_public_ip.txt
+  artifacts:
+    paths:
+      - ec2_public_ip.txt
+  when: manual
