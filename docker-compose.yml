@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  backend:
+    image: golang:1.21-alpine
+    command: sh -c "echo 'Hello from Go backend' && sleep infinity"  # Dummy Go app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app  # Mount for future Go code
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html  # Mount for future React build
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: notes
+      POSTGRES_USER: notesuser
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
