@@ -17,7 +17,7 @@ terraform_setup:
   when: manual
 
 
-  # Reusable SSH base job
+# Reusable SSH base job
 .ssh_base:
   image: alpine:latest
   before_script:
