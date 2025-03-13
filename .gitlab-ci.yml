@@ -38,7 +38,7 @@ deploy_to_ec2:
   extends: .ssh_base
   stage: deploy
   script:
-    - ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << 'EOF'
+    - ssh -i ~/.ssh/steamednotes_key.pem -t ubuntu@$EC2_HOST << 'EOF'
         set -x
         echo "Next we will update and install docker and git"
         sudo apt update -y
