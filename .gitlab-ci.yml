@@ -39,12 +39,13 @@ deploy_to_ec2:
   stage: deploy
   script:
     - ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << 'EOF'
+        set -x
+        echo "Next we will update and install docker and git"
+        sudo apt update -y
+        sudo apt install -y docker.io git docker-compose psmisc
         echo "We will stop processes in port 80 and 8080"
         sudo fuser -k 80/tcp || true 
         sudo fuser -k 8080/tcp || true 
-        echo "Next we will update and install docker and git"
-        sudo apt update -y
-        sudo apt install -y docker.io git docker-compose
         echo "Starting docker"
         sudo systemctl start docker
         sudo usermod -a -G docker ubuntu
