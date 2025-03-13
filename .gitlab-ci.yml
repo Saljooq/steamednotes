@@ -25,7 +25,6 @@ terraform_setup:
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - EC2_HOST=$(cat ec2_public_ip.txt)
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
 
