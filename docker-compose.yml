@@ -13,8 +13,15 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./frontend:/usr/share/nginx/html  # Mount for future React build
+      - frontend_dist:/usr/share/nginx/html  # Mount for future React build
+
+  frontend_build:
+    build:
+      context: ./frontend/steamed-notes-frontend
+      dockerfile: Dockerfile
+    volumes:
+      - frontend_dist:/app/dist  # Output build artifacts
 
 
 volumes:
-  pgdata:
+  frontend_dist:

@@ -55,6 +55,6 @@ deploy_to_ec2:
         rm -rf app
         git clone --depth=1 $REPO_URL app
         cd app
-        docker-compose up -d
+        docker-compose up -d --build
       EOF
   when: manual
