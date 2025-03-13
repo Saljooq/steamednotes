@@ -23,9 +23,10 @@ terraform_setup:
   before_script:
     - apk add --no-cache openssh-client docker docker-compose git
     - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/steamednotes_key
-    - chmod 600 ~/.ssh/steamednotes_key
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/steamednotes_key.pem
+    - chmod 600 ~/.ssh/steamednotes_key.pem
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+    - ssh -i ~/.ssh/steamednotes_key.pem -v ubuntu@$EC2_HOST || true  # Verbose debug
 
 
 # This would do several things:
@@ -37,7 +38,7 @@ deploy_to_ec2:
   extends: .ssh_base
   stage: deploy
   script:
-    - ssh -i ~/.ssh/steamednotes_key ubuntu@$EC2_HOST << 'EOF'
+    - ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << 'EOF'
         echo "We will stop processes in port 80 and 8080"
         sudo fuser -k 80/tcp || true 
         sudo fuser -k 8080/tcp || true 
