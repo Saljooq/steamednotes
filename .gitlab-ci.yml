@@ -23,8 +23,8 @@ terraform_setup:
   before_script:
     - apk add --no-cache openssh-client docker docker-compose git
     - mkdir -p ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/steamednotes_key
+    - chmod 600 ~/.ssh/steamednotes_key
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
 
