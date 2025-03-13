@@ -30,20 +30,20 @@ terraform_setup:
 
 
 
-  deploy_to_ec2:
-    extends: .ssh_base
-    stage: deploy
-    script:
-      - ssh -i ~/.ssh/id_rsa ubuntu@$EC2_HOST << 'EOF'
-          sudo fuser -k 80/tcp || true 
-          sudo fuser -k 8080/tcp || true 
-          sudo apt update -y
-          sudo apt install -y docker.io git
-          sudo systemctl start docker
-          sudo usermod -a -G docker ubuntu
-          sudo apt install -y docker-compose
-          git clone --depth=1 $REPO_URL app
-          cd app
-          docker-compose up -d
-        EOF
-    when: manual
+deploy_to_ec2:
+  extends: .ssh_base
+  stage: deploy
+  script:
+    - ssh -i ~/.ssh/id_rsa ubuntu@$EC2_HOST << 'EOF'
+        sudo fuser -k 80/tcp || true 
+        sudo fuser -k 8080/tcp || true 
+        sudo apt update -y
+        sudo apt install -y docker.io git
+        sudo systemctl start docker
+        sudo usermod -a -G docker ubuntu
+        sudo apt install -y docker-compose
+        git clone --depth=1 $REPO_URL app
+        cd app
+        docker-compose up -d
+      EOF
+  when: manual
