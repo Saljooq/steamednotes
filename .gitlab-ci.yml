@@ -26,7 +26,7 @@ terraform_setup:
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/steamednotes_key.pem
     - chmod 600 ~/.ssh/steamednotes_key.pem
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-    - ssh -i ~/.ssh/steamednotes_key.pem -v ubuntu@$EC2_HOST || true  # Verbose debug
+    # - ssh -i ~/.ssh/steamednotes_key.pem -v ubuntu@$EC2_HOST || true  # Verbose debug
 
 
 # This would do several things:
