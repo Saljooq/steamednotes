@@ -29,19 +29,30 @@ terraform_setup:
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
 
-
+# This would do several things:
+# 1. KILL processes in all ports that might be used (80 and 8080)
+# 2. check if repo is already there, do docker compose down otherwise get 
+# the latest changes
+# 3. 
 deploy_to_ec2:
   extends: .ssh_base
   stage: deploy
   script:
     - ssh -i ~/.ssh/id_rsa ubuntu@$EC2_HOST << 'EOF'
+        echo "We will stop processes in port 80 and 8080"
         sudo fuser -k 80/tcp || true 
         sudo fuser -k 8080/tcp || true 
+        echo "Next we will update and install docker and git"
         sudo apt update -y
-        sudo apt install -y docker.io git
+        sudo apt install -y docker.io git docker-compose
+        echo "Starting docker"
         sudo systemctl start docker
         sudo usermod -a -G docker ubuntu
         sudo apt install -y docker-compose
+        echo "Next we check if existing repo existed we do docker-compose down"
+        cd ~ && [ -d app ] && cd app && docker-compose down || true
+        echo "Cleaning up previous work and doing a fresh clone"
+        rm -rf app
         git clone --depth=1 $REPO_URL app
         cd app
         docker-compose up -d
