@@ -38,6 +38,7 @@ deploy_to_ec2:
   extends: .ssh_base
   stage: deploy
   script:
+    - scp -i ~/.ssh/steamednotes_key.pem backend/main ubuntu@$EC2_HOST:/home/ubuntu/app/main
     - |
       ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
         set -x
@@ -59,4 +60,16 @@ deploy_to_ec2:
         cd app
         docker-compose up -d --build
       ENDSSH
+  when: manual
+
+build_go_binary:
+  stage: build
+  image: golang:1.23
+  script:
+    - cd backend
+    - go build -o main .
+  artifacts:
+    paths:
+      - backend/main  # Store the binary
+    expire_in: 1 hour
   when: manual
