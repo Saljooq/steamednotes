@@ -1,5 +1,4 @@
-FROM golang:1.23-alpine
+FROM alpine:3.19
 WORKDIR /app
-COPY . .
-RUN go build -o main .
+COPY main .  # Copy pre-built binary
 CMD ["./main"]
