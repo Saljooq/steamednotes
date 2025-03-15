@@ -3,6 +3,7 @@ variables:
 
 stages:
  - terraform
+ - build
  - deploy
 
 terraform_setup:
