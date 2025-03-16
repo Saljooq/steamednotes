@@ -1,4 +1,4 @@
-FROM alpine:3.19
+FROM ubuntu:22.04
 WORKDIR /app
 COPY main .
 CMD ["./main"]
