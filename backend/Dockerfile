@@ -1,4 +1,4 @@
 FROM alpine:3.19
 WORKDIR /app
-COPY main .  # Copy pre-built binary
+COPY main .
 CMD ["./main"]
