@@ -8,20 +8,12 @@ services:
       - "8080:8080"
 
   frontend:
-    image: nginx:alpine
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
       - "80:80"
     volumes:
-      - frontend_dist:/usr/share/nginx/html  # Mount for future React build
       - ./frontend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-
-  frontend_build:
-    build:
-      context: ./frontend/steamed-notes-frontend
-      dockerfile: Dockerfile
-    volumes:
-      - frontend_dist:/app/dist  # Output build artifacts
-
-
-volumes:
-  frontend_dist:
+    depends_on:
+      - backend
