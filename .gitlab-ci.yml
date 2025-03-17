@@ -39,8 +39,13 @@ deploy_to_ec2:
   extends: .ssh_base
   stage: deploy
   script:
-    - scp -i ~/.ssh/steamednotes_key.pem backend/main ubuntu@$EC2_HOST:/tmp/main
     - |
+      if [ -f backend/main ]; then
+        echo "Copying over the artifacts"
+        scp -i ~/.ssh/steamednotes_key.pem backend/main ubuntu@$EC2_HOST:/tmp/main
+      else
+        echo "No artifacts to copy - will use if any already existed in remote"
+      fi
       ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
         set -x
         echo "Next we will update and install docker and git"
@@ -60,7 +65,7 @@ deploy_to_ec2:
         rm -rf app
         git clone --depth=1 $REPO_URL app
         cd app
-        mv /tmp/main backend/main
+        cp /tmp/main backend/main
         docker-compose up -d --build
       ENDSSH
   when: manual
