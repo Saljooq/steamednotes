@@ -1,16 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
   const [notes, setNotes] = useState("")
-
-  const apiUrl = window.location.origin;
-  fetch(`${apiUrl}/api/notes`)
-    .then(res => res.text())
-    .then(setNotes)
-    .catch(console.log)
+  
+  useEffect(() => {
+    const apiUrl = window.location.origin;
+    fetch(`${apiUrl}/api/notes`)
+      .then(res => res.text())
+      .then(setNotes)
+      .catch(console.log)
+  }, [])
 
   return (
     <>
