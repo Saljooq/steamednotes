@@ -91,7 +91,7 @@ function App() {
         <button type="submit">Add Note</button>
       </form>
       <ul>
-        {notes.length > 0 ? (
+        {notes?.length > 0 ? (
           notes.map((note) => <li key={note.ID}>{note.Content}</li>)
         ) : (
           <li>No notes yet</li>
