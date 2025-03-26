@@ -91,7 +91,7 @@ rebuild_and_deploy_frontend:
           cd app
           docker-compose down
           cd frontend
-          mkdir temp
+          mkdir tmp
           cd tmp
           git clone --depth=1 $REPO_URL app
           cd ..
