@@ -14,7 +14,23 @@ terraform_setup:
     - terraform init
     - terraform plan
     - terraform apply -auto-approve
-    - terraform output -raw ec2_public_ip
+    - |
+      NEW_IP=$(terraform output -raw ec2_public_ip)
+      if [ "$NEW_IP" != "EC2_HOST" ]; then
+        echo "IP has changed! Updating GitLab CI/CD variable from $EC2_HOST to $NEW_IP..."
+        curl --request PUT \
+          --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+          --data "value=$NEW_IP" \
+          "https://gitlab.com/api/v4/projects/$PROJECT_ID/variables/EC2_HOST"
+        if [ $? -eq 0 ]; then
+          echo "Successfully updated EC2_HOST to $NEW_IP."
+        else
+          echo "Failed to update variable EC2_HOST!"
+          exit 1
+        fi
+      else
+        echo "No change in public IP detected. It's still $EC2_HOST"
+      fi
   when: manual
 
 
@@ -81,25 +97,3 @@ build_go_binary:
       - backend/main  # Store the binary
     expire_in: 1 hour
   when: manual
-
-rebuild_and_deploy_frontend:
-    extends: .ssh_base
-    stage: deploy
-    script:
-      - |
-        ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
-          set -x
-          cd app
-          docker-compose down
-          cd frontend
-          mkdir tmp
-          cd tmp
-          git clone --depth=1 $REPO_URL app
-          cd ..
-          rm -rf steamed-notes-frontend
-          cp -r ./tmp/app/frontend/steamed-notes-frontend .
-          rm -rf ./tmp
-          cd ..
-          docker-compose up -d --build
-        ENDSSH
-    when: manual
