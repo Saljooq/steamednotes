@@ -16,7 +16,7 @@ terraform_setup:
     - terraform apply -auto-approve
     - |
       NEW_IP=$(terraform output -raw ec2_public_ip)
-      if [ "$NEW_IP" != "EC2_HOST" ]; then
+      if [ "$NEW_IP" != "$EC2_HOST" ]; then
         echo "IP has changed! Updating GitLab CI/CD variable from $EC2_HOST to $NEW_IP..."
         curl --request PUT \
           --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
