@@ -81,3 +81,23 @@ build_go_binary:
       - backend/main  # Store the binary
     expire_in: 1 hour
   when: manual
+
+rebuild_and_deploy_frontend:
+    extends: .ssh_base
+    stage: deploy
+    script:
+      - |
+        ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
+          cd app
+          docker-compose down
+          cd frontend
+          mkdir temp
+          cd tmp
+          git clone --depth=1 $REPO_URL app
+          cd ..
+          rm -rf steamed-notes-frontend
+          cp ./tmp/app/frontend/steamed-notes-frontend .
+          cd ..
+          docker-compose up -d --build
+        ENDSSH
+    when: manual
