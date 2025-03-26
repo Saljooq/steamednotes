@@ -57,10 +57,16 @@ deploy_to_ec2:
   script:
     - |
       if [ -f backend/main ]; then
-        echo "Copying over the artifacts"
+        echo "Copying over the backend artifacts"
         scp -i ~/.ssh/steamednotes_key.pem backend/main ubuntu@$EC2_HOST:/tmp/main
       else
-        echo "No artifacts to copy - will use if any already existed in remote"
+        echo "No artifacts backend to copy - will use if any already existed in remote"
+      fi
+      if [ -d dist ]; then
+        echo "Copying over the frontend artifacts"
+        scp -r -i ~/.ssh/steamednotes_key.pem dist ubuntu@$EC2_HOST:/tmp/
+      else
+        echo "No frontend artifacts to copy - will use existing on remote if present"
       fi
       ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
         set -x
@@ -73,7 +79,6 @@ deploy_to_ec2:
         echo "Starting docker"
         sudo systemctl start docker
         sudo usermod -a -G docker ubuntu
-        sudo apt install -y docker-compose
         echo "Next we check if existing repo existed we do docker-compose down"
         cd ~ && [ -d app ] && cd app && docker-compose down || true
         echo "Cleaning up previous work and doing a fresh clone"
@@ -81,7 +86,8 @@ deploy_to_ec2:
         rm -rf app
         git clone --depth=1 $REPO_URL app
         cd app
-        cp /tmp/main backend/main
+        [ -f /tmp/main ] && cp /tmp/main backend/main || echo "No backend/main to copy"
+        [ -d /tmp/dist ] && mv /tmp/dist . || echo "No dist to move"
         docker-compose up -d --build
       ENDSSH
   when: manual
@@ -97,3 +103,17 @@ build_go_binary:
       - backend/main  # Store the binary
     expire_in: 1 hour
   when: manual
+
+
+build_frontend:
+  stage: build
+  image: node:22
+  script:
+    - cd frontend/steamed-notes-frontend
+    - npm install
+    - npm run build
+    - mv dist ../../  # Move to root for Dockerfile
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
