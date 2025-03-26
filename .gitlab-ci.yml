@@ -87,8 +87,9 @@ deploy_to_ec2:
         git clone --depth=1 $REPO_URL app
         cd app
         [ -f /tmp/main ] && cp /tmp/main backend/main || echo "No backend/main to copy"
-        [ -d /tmp/dist ] && mv /tmp/dist . || echo "No dist to move"
-        docker-compose up -d --build
+        [ -d /tmp/dist ] && cp -r /tmp/dist/. dist || echo "No dist to copy"
+        chmod +x backend/main
+        docker-compose up -d
       ENDSSH
   when: manual
 

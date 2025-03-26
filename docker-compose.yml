@@ -1,11 +1,12 @@
 version: "3.8"
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: alpine:3.19
+    command: /app/main 
     ports:
       - "8080:8080"
+    volumes:
+      - ./backend/main:/app/main
 
   frontend:
     image: nginx:alpine
