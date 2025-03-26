@@ -88,6 +88,7 @@ rebuild_and_deploy_frontend:
     script:
       - |
         ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
+          set -x
           cd app
           docker-compose down
           cd frontend
@@ -96,7 +97,8 @@ rebuild_and_deploy_frontend:
           git clone --depth=1 $REPO_URL app
           cd ..
           rm -rf steamed-notes-frontend
-          cp ./tmp/app/frontend/steamed-notes-frontend .
+          cp -r ./tmp/app/frontend/steamed-notes-frontend .
+          rm -rf ./tmp
           cd ..
           docker-compose up -d --build
         ENDSSH
