@@ -4,15 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Get all notes for signed-in user
 func getNotes(w http.ResponseWriter, r *http.Request) {
-	username := r.Header.Get("X-Username") // Temp auth
-	if username == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	username := r.Header.Get("Username")
 	notesM.Lock()
 	defer notesM.Unlock()
 	var userNotes []Note
@@ -26,11 +25,7 @@ func getNotes(w http.ResponseWriter, r *http.Request) {
 
 // Create a note
 func createNote(w http.ResponseWriter, r *http.Request) {
-	username := r.Header.Get("X-Username")
-	if username == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
+	username := r.Header.Get("Username")
 	var note Note
 	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
@@ -55,7 +50,24 @@ func signIn(w http.ResponseWriter, r *http.Request) {
 	}
 	for _, user := range users {
 		if user.Username == creds.Username && user.Password == creds.Password {
-			w.WriteHeader(http.StatusOK)
+			token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
+				Username: creds.Username,
+				RegisteredClaims: jwt.RegisteredClaims{
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+				},
+			})
+			tokenString, err := token.SignedString(secret)
+			if err != nil {
+				http.Error(w, "Server error", http.StatusInternalServerError)
+				return
+			}
+			http.SetCookie(w, &http.Cookie{
+				Name:     "token",
+				Value:    tokenString,
+				Expires:  time.Now().Add(24 * time.Hour),
+				HttpOnly: true, // Prevent JS access
+				Path:     "/",
+			})
 			fmt.Fprintf(w, "Signed in as %s", creds.Username)
 			return
 		}

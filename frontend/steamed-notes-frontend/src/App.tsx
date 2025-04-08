@@ -21,6 +21,7 @@ function App() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
+      credentials: "include",
     });
     if (res.ok) {
       setSignedIn(true);
@@ -33,7 +34,9 @@ function App() {
   const fetchNotes = async () => {
     const res = await fetch(`${apiUrl}/api/notes`, {
       headers: { "X-Username": username },
+      credentials: "include",
     });
+    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
     const data = await res.json();
     console.log("Here's what we got")
     console.log(data)
@@ -50,6 +53,7 @@ function App() {
         "X-Username": username,
       },
       body: JSON.stringify({ content: newNote }),
+      credentials: "include",
     });
     if (res.ok) {
       setNewNote("");
