@@ -1,6 +1,10 @@
 import { useState } from "react";
 
-export function SignIn({ onSignIn }) {
+interface SignInProps {
+    onSignIn: (user: string) => void;
+}
+
+export function SignIn({ onSignIn }: SignInProps) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const apiUrl = window.location.origin;

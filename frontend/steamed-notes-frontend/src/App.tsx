@@ -85,7 +85,6 @@ function App() {
             signedIn ? (
               <Notes
                 username={username}
-                fetchNotes={fetchNotes}
                 notes={notes}
                 newNote={newNote}
                 setNewNote={setNewNote}

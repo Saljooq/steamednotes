@@ -1,6 +1,27 @@
-export default function Notes({ username, fetchNotes, notes, newNote, setNewNote, handleCreateNote }){ 
-    
-    return (
+import React from 'react';
+
+interface Note {
+  ID: number;
+  Content: string;
+  Owner: string;
+}
+
+interface NotesProps {
+  username: string;
+  notes: Note[];
+  newNote: string;
+  setNewNote: (value: string) => void;
+  handleCreateNote: (e: React.FormEvent<HTMLFormElement>) => void;
+}
+
+export default function Notes({ 
+  username, 
+  notes, 
+  newNote, 
+  setNewNote, 
+  handleCreateNote 
+}: NotesProps) { 
+  return (
     <div>
       <h1>Steamed Notes - {username}</h1>
       <form onSubmit={handleCreateNote}>
@@ -20,5 +41,4 @@ export default function Notes({ username, fetchNotes, notes, newNote, setNewNote
       </ul>
     </div>
   );
-
 }
