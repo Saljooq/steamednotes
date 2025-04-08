@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { SignIn } from "./SignIn";
+import Notes from "./Notes";
 
 interface Note {
   ID: number
@@ -8,28 +11,28 @@ interface Note {
 
 function App() {
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [signedIn, setSignedIn] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState("");
 
   const apiUrl = window.location.origin;
 
-  const handleSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await fetch(`${apiUrl}/api/signin`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-      credentials: "include",
-    });
-    if (res.ok) {
-      setSignedIn(true);
-      fetchNotes();
-    } else {
-      alert("Sign-in failed");
-    }
-  };
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch(`${apiUrl}/api/notes`, {
+          credentials: "include",
+        });
+        if (res.ok) {
+          setSignedIn(true);
+          await fetchNotes();
+        }
+      } catch (err) {
+        console.error("Auth check failed:", err);
+      }
+    };
+    checkAuth();
+  }, []);
 
   const fetchNotes = async () => {
     const res = await fetch(`${apiUrl}/api/notes`, {
@@ -60,49 +63,43 @@ function App() {
       fetchNotes();
     }
   };
+  
+  const handleSignInSuccess = (user: string) => {
+    setSignedIn(true);
+    setUsername(user);
+    fetchNotes();
+  };
 
-  if (!signedIn) {
-    return (
-      <div>
-        <h1>Steamed Notes - Sign In</h1>
-        <form onSubmit={handleSignIn}>
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
-          />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-          />
-          <button type="submit">Sign In</button>
-        </form>
-      </div>
-    );
-  }
+
 
   return (
-    <div>
-      <h1>Steamed Notes - {username}</h1>
-      <form onSubmit={handleCreateNote}>
-        <input
-          value={newNote}
-          onChange={(e) => setNewNote(e.target.value)}
-          placeholder="New note"
+    <BrowserRouter>
+      <Routes>
+        <Route
+          path="/signin"
+          element={signedIn ? <Navigate to="/notes" /> : <SignIn onSignIn={handleSignInSuccess} />}
         />
-        <button type="submit">Add Note</button>
-      </form>
-      <ul>
-        {notes?.length > 0 ? (
-          notes.map((note) => <li key={note.ID}>{note.Content}</li>)
-        ) : (
-          <li>No notes yet</li>
-        )}
-      </ul>
-    </div>
-  );
+        <Route
+          path="/notes"
+          element={
+            signedIn ? (
+              <Notes
+                username={username}
+                fetchNotes={fetchNotes}
+                notes={notes}
+                newNote={newNote}
+                setNewNote={setNewNote}
+                handleCreateNote={handleCreateNote}
+              />
+            ) : (
+              <Navigate to="/signin" />
+            )
+          }
+        />
+        <Route path="/" element={<Navigate to="/notes" />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App;
