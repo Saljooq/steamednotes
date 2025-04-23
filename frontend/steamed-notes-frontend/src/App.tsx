@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { SignIn } from "./SignIn";
+import Terminal from "./terminal/Terminal"
 import Notes from "./Notes";
 
 interface Note {
@@ -12,6 +13,7 @@ interface Note {
 function App() {
   const [username, setUsername] = useState("");
   const [signedIn, setSignedIn] = useState(false);
+  const [ hasCheckedSignIn, setHasCheckedSignIn] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState("");
 
@@ -23,13 +25,16 @@ function App() {
         const res = await fetch(`${apiUrl}/api/notes`, {
           credentials: "include",
         });
+        setHasCheckedSignIn(true);
         if (res.ok) {
+          console.log("Sign in successful")
           setSignedIn(true);
           await fetchNotes();
         }
       } catch (err) {
         console.error("Auth check failed:", err);
-      }
+        setHasCheckedSignIn(true);
+      } 
     };
     checkAuth();
   }, []);
@@ -72,6 +77,7 @@ function App() {
 
 
 
+
   return (
     <BrowserRouter>
       <Routes>
@@ -82,19 +88,22 @@ function App() {
         <Route
           path="/notes"
           element={
-            signedIn ? (
-              <Notes
-                username={username}
-                notes={notes}
-                newNote={newNote}
-                setNewNote={setNewNote}
-                handleCreateNote={handleCreateNote}
-              />
-            ) : (
-              <Navigate to="/signin" />
-            )
+            hasCheckedSignIn ? (
+              signedIn ? (
+                <Notes
+                  username={username}
+                  notes={notes}
+                  newNote={newNote}
+                  setNewNote={setNewNote}
+                  handleCreateNote={handleCreateNote}
+                />
+              ) : (
+                <Navigate to="/signin" />
+              )
+            ) : <h1>Loading...</h1>
           }
         />
+        <Route path="terminal" element={<Terminal/>}/>
         <Route path="/" element={<Navigate to="/notes" />} />
       </Routes>
     </BrowserRouter>
