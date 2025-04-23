@@ -19,7 +19,18 @@ The project is to enable better note taking
 
 
 ## Roadmap
-#TODO
+- [ ] Add option to delete note
+- [ ] Add logout mechanism
+- [ ] Add rooms/boxes/tables for the notes i.e. I can look at different area of notes
+- [ ] Add mechanism to create account
+- [ ] Add rate limiting
+- [ ] Add postgres db
+- [ ] Add ORM - probably sqlc
+- [ ] Add migration version tool - likely flyway
+- [ ] Confirm notes persist beyond session
+- [ ] Enable https with let's encrypt
+- [ ] Add more detailed notes on architecture
+- [ ] Add caching layer (redis) - Long long term
 
 ## Contributing
 #TODO
