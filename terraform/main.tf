@@ -19,6 +19,7 @@ data "aws_subnet" "default" {
 resource "aws_security_group" "webserver" {
   name        = "webserver-sg"
   description = "Allow SSH and HTTP inbound traffic"
+  vpc_id      = data.aws_vpc.default.id # Explicitly tie to default VPC
   
   ingress {
     from_port   = 22
@@ -48,6 +49,8 @@ resource "aws_instance" "webserver" {
   instance_type = var.instance_type
   key_name      = var.key_name
   subnet_id     = data.aws_subnet.default.id
+  vpc_security_group_ids      = [aws_security_group.webserver.id] # Use ID instead of name
+
   
   security_groups = [aws_security_group.webserver.name]
 
