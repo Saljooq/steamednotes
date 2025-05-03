@@ -15,7 +15,7 @@ data "aws_subnet" "default" {
   availability_zone = "us-east-1a" # Update to your preferred AZ
 }
 
-# Security Group to allow SSH and HTTP access
+# Security Group to allow SSH, HTTP and HTTPS access
 resource "aws_security_group" "webserver" {
   name        = "webserver-sg"
   description = "Allow SSH and HTTP inbound traffic"
@@ -35,11 +35,27 @@ resource "aws_security_group" "webserver" {
     cidr_blocks = ["0.0.0.0/0"]  # Open HTTP port for public access
   }
 
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"  # Allows all outbound traffic
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name    = "webserver-sg"
+    Project = "SteamedNotes"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -50,13 +66,6 @@ resource "aws_instance" "webserver" {
   key_name      = var.key_name
   subnet_id     = data.aws_subnet.default.id
   vpc_security_group_ids      = [aws_security_group.webserver.id] # Use ID instead of name
-
-  
-  security_groups = [aws_security_group.webserver.name]
-
-  tags = {
-    Name = "webserver-EC2"
-  }
 
   # Automatically associate a public IP address for instance
   associate_public_ip_address = true
