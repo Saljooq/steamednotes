@@ -4,6 +4,16 @@
 provider "aws" {
   region = "us-east-1"  # Change to your preferred region
 }
+# Data source to fetch default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Data source to fetch a subnet from default VPC (pick one AZ)
+data "aws_subnet" "default" {
+  vpc_id            = data.aws_vpc.default.id
+  availability_zone = "us-east-1a" # Update to your preferred AZ
+}
 
 # Security Group to allow SSH and HTTP access
 resource "aws_security_group" "webserver" {
@@ -37,6 +47,7 @@ resource "aws_instance" "webserver" {
   ami           = var.ami_id
   instance_type = var.instance_type
   key_name      = var.key_name
+  subnet_id     = data.aws_subnet.default.id
   
   security_groups = [aws_security_group.webserver.name]
 
