@@ -90,7 +90,7 @@ deploy_to_ec2:
         [ -f /tmp/main ] && cp /tmp/main backend/main || echo "No backend/main to copy"
         [ -d /tmp/dist ] && cp -r /tmp/dist/. dist || echo "No dist to copy"
         chmod +x backend/main
-        docker-compose up -d
+        sudo docker-compose up -d
       ENDSSH
   when: manual
 
