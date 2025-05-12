@@ -60,7 +60,7 @@ func main() {
 	queries := db.New(conn)
 
 	// List users handler
-	http.HandleFunc("GET /users", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("GET /api/users", func(w http.ResponseWriter, r *http.Request) {
 		users, err := queries.ListUsers(r.Context())
 		if err != nil {
 			http.Error(w, `{"error":"Failed to list users"}`, http.StatusInternalServerError)
@@ -72,7 +72,7 @@ func main() {
 	})
 
 	// Create user handler
-	http.HandleFunc("POST /adduser", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("POST /api/adduser", func(w http.ResponseWriter, r *http.Request) {
 		var req db.CreateUserParams
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
