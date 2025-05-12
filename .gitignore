@@ -1,2 +1,4 @@
 backend/main
 *.exe
+Dev/dbdata/data/*
+/terraform
