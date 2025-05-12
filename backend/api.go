@@ -23,6 +23,21 @@ func getNotes(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userNotes)
 }
 
+// Get all notes for signed-in user
+func health(w http.ResponseWriter, r *http.Request) {
+	username := r.Header.Get("Username")
+	notesM.Lock()
+	defer notesM.Unlock()
+	var userNotes []Note
+	for _, note := range notes {
+		if note.Owner == username {
+			userNotes = append(userNotes, note)
+		}
+	}
+	json.NewEncoder(w).Encode(userNotes)
+}
+
+
 // Create a note
 func createNote(w http.ResponseWriter, r *http.Request) {
 	username := r.Header.Get("Username")
