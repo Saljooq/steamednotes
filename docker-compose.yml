@@ -2,7 +2,13 @@ version: "3.8"
 services:
   backend:
     image: alpine:3.19
-    command: DB_HOST=postgres DB_PORT=5432 DB_USER=steamed_user DB_PASSWORD=steamed_password DB_NAME=steamed_notes /app/main 
+    environment:
+      DB_HOST: localhost
+      DB_USER: steamed_user
+      DB_PASSWORD: steamed_password
+      DB_NAME: steamed_notes
+      DB_PORT: 5432
+    command: /app/main 
     ports:
       - "8080:8080"
     volumes:
