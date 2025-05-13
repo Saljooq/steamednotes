@@ -94,7 +94,6 @@ deploy_to_ec2:
         sudo docker-compose up -d
         docker ps -a
         CONTAINER_IDS=\$(docker ps -a -q)
-        echo "\$CONTAINER_IDS"
         set +x
         for ID in \${CONTAINER_IDS} 
         do 
