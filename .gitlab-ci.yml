@@ -69,7 +69,7 @@ deploy_to_ec2:
       else
         echo "No frontend artifacts to copy - will use existing on remote if present"
       fi
-      ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
+      ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << 'ENDSSH'
         set -x
         echo "Next we will update and install docker and git"
         sudo apt update -y
@@ -94,8 +94,8 @@ deploy_to_ec2:
         sudo docker-compose up -d
         docker ps -a
         CONTAINER_IDS=\$(docker ps -a -q)
-        echo $CONTAINER_IDS
-        for ID in $CONTAINER_IDS 
+        echo "$CONTAINER_IDS"
+        for ID in ${CONTAINER_IDS} 
         do 
           echo "Printing logs for $ID" 
           echo "======================================" 
