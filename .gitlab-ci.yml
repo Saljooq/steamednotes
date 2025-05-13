@@ -94,8 +94,8 @@ deploy_to_ec2:
         sudo docker-compose up -d
         docker ps -a
         CONTAINER_IDS=\$(docker ps -a -q)
-        echo "$CONTAINER_IDS"
-        for ID in ${CONTAINER_IDS} 
+        echo "\$CONTAINER_IDS"
+        for ID in \${CONTAINER_IDS} 
         do 
           echo "Printing logs for $ID" 
           echo "======================================" 
