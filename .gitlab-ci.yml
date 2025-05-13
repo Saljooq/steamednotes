@@ -92,6 +92,8 @@ deploy_to_ec2:
         [ -d /tmp/dist ] && cp -r /tmp/dist/. dist || echo "No dist to copy"
         chmod +x backend/main
         sudo docker-compose up -d
+        docker ps -a
+        for ID in $(docker ps -a -q); do echo "Printing logs for $ID"; echo "======================================"; docker logs $ID | tail -n 15; printf "\n\n\n"; done
       ENDSSH
   when: manual
 

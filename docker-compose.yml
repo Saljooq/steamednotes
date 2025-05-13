@@ -3,7 +3,7 @@ services:
   backend:
     image: alpine:3.19
     environment:
-      DB_HOST: localhost
+      DB_HOST: postgres
       DB_USER: steamed_user
       DB_PASSWORD: steamed_password
       DB_NAME: steamed_notes
@@ -14,7 +14,7 @@ services:
     volumes:
       - ./backend/main:/app/main
     depends_on:
-      - postgres
+      - flyway
 
   frontend:
     image: nginx:alpine
@@ -23,6 +23,8 @@ services:
     volumes:
       - ./dist:/usr/share/nginx/html
       - ./frontend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
 
   postgres:
     image: postgres:16-alpine
@@ -42,6 +44,8 @@ services:
 
   flyway:
     image: flyway/flyway:latest
+    environment:
+      - FLYWAY_LOCATIONS=filesystem:/flyway/sql
     command: -url=jdbc:postgresql://postgres:5432/steamed_notes -schemas=public -user=steamed_user -password=steamed_password -connectRetries=60 migrate
     volumes:
       - ./flyway/sql:/flyway/sql
