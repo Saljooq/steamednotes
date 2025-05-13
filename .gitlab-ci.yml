@@ -93,7 +93,13 @@ deploy_to_ec2:
         chmod +x backend/main
         sudo docker-compose up -d
         docker ps -a
-        for ID in $(docker ps -a -q); do echo "Printing logs for $ID"; echo "======================================"; docker logs $ID | tail -n 15; printf "\n\n\n"; done
+        for ID in $(docker ps -a -q) 
+        do 
+          echo "Printing logs for $ID" 
+          echo "======================================" 
+          docker logs $ID | tail -n 15 
+          printf "\n\n\n" 
+        done
       ENDSSH
   when: manual
 
