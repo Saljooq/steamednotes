@@ -95,11 +95,12 @@ deploy_to_ec2:
         docker ps -a
         CONTAINER_IDS=\$(docker ps -a -q)
         echo "\$CONTAINER_IDS"
+        set +x
         for ID in \${CONTAINER_IDS} 
         do 
-          echo "Printing logs for $ID" 
+          echo "Printing logs for \$ID" 
           echo "======================================" 
-          docker logs $ID | tail -n 15 
+          docker logs \$ID | tail -n 15 
           printf "\n\n\n" 
         done
       ENDSSH
