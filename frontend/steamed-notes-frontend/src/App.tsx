@@ -3,6 +3,8 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { SignIn } from "./SignIn";
 import Terminal from "./terminal/Terminal"
 import Notes from "./Notes";
+import SignupForm from "./CreateUser";
+import RoomsScreen from "./Rooms";
 
 interface Note {
   ID: number
@@ -103,8 +105,10 @@ function App() {
             ) : <h1>Loading...</h1>
           }
         />
+        <Route path="/signup" element={<SignupForm/>} />
         <Route path="terminal" element={<Terminal/>}/>
         <Route path="/" element={<Navigate to="/notes" />} />
+        <Route path="/rooms" element={<RoomsScreen/>} />
       </Routes>
     </BrowserRouter>
   )
