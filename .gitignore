@@ -2,3 +2,4 @@ backend/main
 *.exe
 Dev/dbdata/data/*
 /terraform
+backend/steamednotes
