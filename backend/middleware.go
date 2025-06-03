@@ -8,7 +8,8 @@ import (
 
 // Claims for JWT
 type Claims struct {
-	Username string `json:"username"`
+	Email string `json:"email"`
+	ID    string `json:"id"`
 	jwt.RegisteredClaims
 }
 
@@ -32,7 +33,8 @@ func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "Unauthorized - invalid claims", http.StatusUnauthorized)
 			return
 		}
-		r.Header.Set("Username", claims.Username) // Pass username downstream
+		r.Header.Set("email", claims.Email) // Pass username downstream
+		r.Header.Set("id", claims.ID)       // Pass username downstream
 		next(w, r)
 	}
 }

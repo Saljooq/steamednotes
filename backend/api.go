@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"steamednotes/db"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -37,7 +39,6 @@ func health(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(userNotes)
 }
 
-
 // Create a note
 func createNote(w http.ResponseWriter, r *http.Request) {
 	username := r.Header.Get("Username")
@@ -57,35 +58,73 @@ func createNote(w http.ResponseWriter, r *http.Request) {
 }
 
 // Sign in
-func signIn(w http.ResponseWriter, r *http.Request) {
+func (conn ConnectionData) signIn(w http.ResponseWriter, r *http.Request) {
 	var creds User
 	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
 		http.Error(w, "Invalid request", http.StatusBadRequest)
 		return
 	}
-	for _, user := range users {
-		if user.Username == creds.Username && user.Password == creds.Password {
-			token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-				Username: creds.Username,
-				RegisteredClaims: jwt.RegisteredClaims{
-					ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-				},
-			})
-			tokenString, err := token.SignedString(secret)
-			if err != nil {
-				http.Error(w, "Server error", http.StatusInternalServerError)
-				return
-			}
-			http.SetCookie(w, &http.Cookie{
-				Name:     "token",
-				Value:    tokenString,
-				Expires:  time.Now().Add(24 * time.Hour),
-				HttpOnly: true, // Prevent JS access
-				Path:     "/",
-			})
-			fmt.Fprintf(w, "Signed in as %s", creds.Username)
+
+	user, err := conn.queries.FindUserByEmail(r.Context(), creds.Email)
+
+	if err != nil {
+		http.Error(w, "Invalid email", http.StatusInternalServerError)
+		return
+	} else {
+		fmt.Printf("Found user with email %s\n", creds.Email)
+	}
+
+	if user.PasswordHash == creds.Password {
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
+			Email: creds.Email,
+			ID:    strconv.Itoa(int(user.ID)),
+			RegisteredClaims: jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)),
+			},
+		})
+		tokenString, err := token.SignedString(secret)
+		if err != nil {
+			http.Error(w, "Server error", http.StatusInternalServerError)
 			return
 		}
+		http.SetCookie(w, &http.Cookie{
+			Name:     "token",
+			Value:    tokenString,
+			Expires:  time.Now().Add(24 * time.Hour),
+			HttpOnly: true, // Prevent JS access
+			Path:     "/",
+		})
+
+		fmt.Fprintf(w, "Signed in as %s", creds.Email)
+
+		json.NewEncoder(w).Encode(map[string]string{"username": user.Username})
+		return
 	}
 	http.Error(w, "Invalid credentials", http.StatusUnauthorized)
 }
+
+func createUser(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (conn ConnectionData) createRoom(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Header.Get("id")
+
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
+	}
+
+	err = conn.queries.CreateRoom(r.Context(), db.CreateRoomParams{Name: "", UserID: int32(iuserID)})
+
+	if err != nil {
+		http.Error(w, "Invalid request, perhaps name already used", http.StatusConflict)
+	} else {
+		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+// func createFolder(w http.ResponseWriter, r *http.Request) {}

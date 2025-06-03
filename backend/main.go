@@ -16,7 +16,7 @@ import (
 
 // Dummy user struct
 type User struct {
-	Username string
+	Email string
 	Password string // Plaintext for now—hash later
 }
 
@@ -27,12 +27,17 @@ type Note struct {
 	Owner   string
 }
 
+// Connection struct
+type ConnectionData struct {
+	queries *db.Queries
+}
+
 // In-memory store
 var (
-	users = []User{
-		{Username: "alice", Password: "pass123"},
-		{Username: "bob", Password: "secret"},
-	}
+	// users = []User{
+	// 	{Username: "alice", Password: "pass123"},
+	// 	{Username: "bob", Password: "secret"},
+	// }
 	notes  []Note
 	notesM sync.Mutex // Thread-safe
 	nextID = 1
@@ -58,6 +63,7 @@ func main() {
 	// mux := http.NewServeMux()
 
 	queries := db.New(conn)
+	conData := ConnectionData{queries: queries}
 
 	// List users handler
 	http.HandleFunc("GET /api/users", func(w http.ResponseWriter, r *http.Request) {
@@ -97,7 +103,12 @@ func main() {
 
 	http.HandleFunc("/api/notes", authMiddleware(getNotes))
 	http.HandleFunc("/api/notes/create", authMiddleware(createNote))
-	http.HandleFunc("/api/signin", signIn)
+	http.HandleFunc("/api/signin", conData.signIn)
+
+	http.HandleFunc("/api/users/create", createUser)
+	http.HandleFunc("/api/rooms/create", authMiddleware(conData.createRoom))
+	// http.HandleFunc("/api/folders/create", authMiddleware(createFolder))
+
 	fmt.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", nil)
 }
