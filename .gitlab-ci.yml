@@ -153,8 +153,9 @@ certificates:
         --email "$EMAIL" --agree-tos --non-interactive \
         --keep-until-expiring --verbose || echo "Certbot failed, check logs"
     - ls -la /certbot/certs/live/steamednotes.com || echo "No certificates found"
-  paths:
-    - certbot/certs/
-    - certbot/www/
-  expire_in: 1 month
+  artifacts:
+    paths:
+      - certbot/certs/
+      - certbot/www/
+    expire_in: 1 month
   when: manual
