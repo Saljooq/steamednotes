@@ -149,7 +149,7 @@ certificates:
     - add-apt-repository universe
     - apt-get update && apt-get install -y certbot
     # Generate certificate using standalone HTTP challenge
-    - mkdir -p certbot/www certbot/certs || echo "Failed to create directories"
+    - mkdir -p /certbot/www /certbot/certs || echo "Failed to create directories"
     - certbot certonly --webroot --webroot-path=/certbot/www \
         -d steamednotes.com -d www.steamednotes.com \
         --email "$EMAIL" --agree-tos --non-interactive \
@@ -157,7 +157,7 @@ certificates:
     - ls -la /certbot/certs/live/steamednotes.com || echo "No certificates found"
   artifacts:
     paths:
-      - certbot/certs/
-      - certbot/www/
+      - /certbot/certs/
+      - /certbot/www/
     expire_in: 1 month
   when: manual
