@@ -143,7 +143,7 @@ build_frontend:
 # Certificate creation/renewal job
 certificates:
   stage: certs
-  image: certbot/certbot:v2.11.0
+  image: certbot/certbot
   script:
     - echo "Running certbot with /bin/sh"
     - mkdir -p certbot/www certbot/certs || echo "Failed to create directories"
