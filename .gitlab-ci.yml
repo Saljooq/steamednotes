@@ -144,7 +144,7 @@ build_frontend:
 certificates:
   stage: certs
   image: certbot/certbot:latest
-  script:
+  step_script:
     - mkdir -p certbot/www certbot/certs
     - certbot certonly --webroot --webroot-path=/certbot/www \
         -d steamednotes.com -d www.steamednotes.com \
