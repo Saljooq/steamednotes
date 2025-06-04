@@ -20,9 +20,12 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./dist:/usr/share/nginx/html
       - ./frontend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certbot/certs:/etc/letsencrypt:ro # Mount certificates
+      - ./certbot/www:/var/www/certbot     # Mount ACME challenge dir
     depends_on:
       - backend
 
@@ -52,3 +55,4 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+        

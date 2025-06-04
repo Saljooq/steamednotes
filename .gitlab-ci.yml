@@ -4,6 +4,7 @@ variables:
 stages:
  - terraform
  - build
+ - certs
  - deploy
 
 terraform_setup:
@@ -69,6 +70,10 @@ deploy_to_ec2:
       else
         echo "No frontend artifacts to copy - will use existing on remote if present"
       fi
+      if [ -d certbot ]; then
+        echo "Copying over the certs"
+        scp -r -i ~/.ssh/steamednotes_key.pem  certbot/certs certbot/www ubuntu@$EC2_HOST:/tmp/certbot/
+      fi
       ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
         set -x
         echo "Next we will update and install docker and git"
@@ -90,6 +95,7 @@ deploy_to_ec2:
         cd app
         [ -f /tmp/main ] && cp /tmp/main backend/main || echo "No backend/main to copy"
         [ -d /tmp/dist ] && cp -r /tmp/dist/. dist || echo "No dist to copy"
+        [ -d /tmp/certbot ] && cp -r /tmp/certbot/. certbot || echo "No certs to copy"
         chmod +x backend/main
         sudo docker-compose up -d
         docker ps -a
@@ -131,4 +137,23 @@ build_frontend:
     paths:
       - dist/
     expire_in: 1 hour
+  when: manual
+
+  
+# Certificate creation/renewal job
+certificates:
+  stage: certs
+  image: certbot/certbot:latest
+  script:
+    - mkdir -p certbot/www certbot/certs
+    - certbot certonly --webroot --webroot-path=/certbot/www \
+        -d steamednotes.com -d www.steamednotes.com \
+        --email $EMAIL --agree-tos --non-interactive \
+        --keep-until-expiring
+    - ls -la /certbot/certs/live/steamednotes.com
+  artifacts:
+    paths:
+      - certbot/certs/
+      - certbot/www/
+    expire_in: 1 month
   when: manual
