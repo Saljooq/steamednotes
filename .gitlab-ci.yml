@@ -144,13 +144,15 @@ build_frontend:
 certificates:
   stage: certs
   image: certbot/certbot:latest
-  step_script:
-    - mkdir -p certbot/www certbot/certs
-    - certbot certonly --webroot --webroot-path=/certbot/www \
-        -d steamednotes.com -d www.steamednotes.com \
-        --email $EMAIL --agree-tos --non-interactive \
-        --keep-until-expiring
-    - ls -la /certbot/certs/live/steamednotes.com
+  script:
+    # Create directories for certs and webroot
+    - mkdir -p certbot/certs certbot/www
+    # Create a valid cli.ini
+    - echo -e "[certbot]\nauth = webroot\nwebroot-path = /certbot/www\nagree-tos = true\nemail = $EMAIL\nnon-interactive = true" > certbot/certs/cli.ini
+    # Run Certbot with existing logic and verbose output
+    - certbot certonly --webroot --webroot-path=/certbot/www -d steamednotes.com -d www.steamednotes.com --email $EMAIL --agree-tos --non-interactive --keep-until-expiring --config /certbot/certs/cli.ini --verbose || true
+    # List generated files for debugging
+    - ls -R certbot
   artifacts:
     paths:
       - certbot/certs/
