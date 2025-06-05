@@ -82,7 +82,7 @@ resource "aws_route53_record" "apex" {
 }
 
 # Route 53 record set (DNS configuration)
-resource "aws_route53_record" "wwww" {
+resource "aws_route53_record" "www" {
   zone_id = data.aws_route53_zone.webserver.zone_id  # Using your existing Route 53 hosted zone
 
   name    = var.domain_name  # www.steamednotes.com
