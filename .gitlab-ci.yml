@@ -150,6 +150,7 @@ certificates:
     - apt-get update && apt-get install -y certbot
     # Generate certificate using standalone HTTP challenge
     - mkdir -p /certbot/www /certbot/certs || echo "Failed to create directories"
+    - certbot -h
     - certbot certonly --webroot --webroot-path=/certbot/www \
         -d steamednotes.com -d www.steamednotes.com \
         --email "$EMAIL" --agree-tos --non-interactive \
