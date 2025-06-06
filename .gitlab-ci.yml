@@ -152,7 +152,7 @@ certificates:
         cd ~/app 
         echo  "Pulling certbot container"
         docker pull certbot/certbot
-        [ -d ./certbot ] || mkdir certbot
+        [ -d ../certbot ] || mkdir ../certbot
         docker stop app_frontend_1
         docker rm app_frontend_1
         docker stop nginx_temp
@@ -161,18 +161,19 @@ certificates:
           -p 80:80 \
           -v ./dist:/usr/share/nginx/html \
           -v ./frontend/nginx/temp_80_only/nginx.conf:/etc/nginx/nginx.conf:ro \
-          -v ./certbot/certs:/etc/letsencrypt \
-          -v ./certbot/www:/var/www/certbot \
+          -v ../certbot/certs:/etc/letsencrypt \
+          -v ../certbot/www:/var/www/certbot \
           nginx:alpine
         docker run -it --rm \
-          -v ./certbot/certs:/etc/letsencrypt \
-          -v ./certbot/www:/var/www \
-          -v ./certbot/log/letsencrypt:/var/log/letsencrypt \
+          -v ../certbot/certs:/etc/letsencrypt \
+          -v ../certbot/www:/var/www \
+          -v ../certbot/log/letsencrypt:/var/log/letsencrypt \
           certbot/certbot certonly \
           --webroot -w /var/www \
           -d steamednotes.com,www.steamednotes.com \
           -m $EMAIL \
           --agree-tos --non-interactive --verbose
+        cd ..
       ENDSSH 
   artifacts:
     paths:
