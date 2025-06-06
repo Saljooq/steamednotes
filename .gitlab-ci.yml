@@ -154,6 +154,7 @@ certificates:
         docker run -it --rm \
         -v ./certbot/certs:/etc/letsencrypt \
         -v ./certbot/www:/var/www \
+        -v ./certbot/log/letsencrypt:/var/log/letsencrypt \
         certbot/certbot certonly \
         --webroot -w /var/www \
         -d steamednotes.com,www.steamednotes.com \
