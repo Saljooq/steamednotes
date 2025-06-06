@@ -90,7 +90,7 @@ deploy_to_ec2:
         echo "Cleaning up previous work and doing a fresh clone"
         cd ~
         [ -f ../dbdata ] || mkdir ../dbdata 
-        rm -rf app
+        sudo rm -rf app
         git clone --depth=1 $REPO_URL app
         cd app
         [ -f /tmp/main ] && cp /tmp/main backend/main || echo "No backend/main to copy"
