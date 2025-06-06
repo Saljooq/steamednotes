@@ -151,15 +151,22 @@ certificates:
         echo  "Pulling certbot container"
         docker pull certbot/certbot
         [ -d ./certbot ] || mkdir certbot
+        docker-compose down
+        docker run -d --name nginx_temp \
+          -p 80:80 \
+          -v ./frontend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+          -v ./certbot/certs:/etc/letsencrypt \
+          -v ./certbot/www:/var/www/certbot \
+          nginx:alpine
         docker run -it --rm \
-        -v ./certbot/certs:/etc/letsencrypt \
-        -v ./certbot/www:/var/www \
-        -v ./certbot/log/letsencrypt:/var/log/letsencrypt \
-        certbot/certbot certonly \
-        --webroot -w /var/www \
-        -d steamednotes.com,www.steamednotes.com \
-        -m $EMAIL \
-        --agree-tos --non-interactive --verbose
+          -v ./certbot/certs:/etc/letsencrypt \
+          -v ./certbot/www:/var/www \
+          -v ./certbot/log/letsencrypt:/var/log/letsencrypt \
+          certbot/certbot certonly \
+          --webroot -w /var/www \
+          -d steamednotes.com,www.steamednotes.com \
+          -m $EMAIL \
+          --agree-tos --non-interactive --verbose
       ENDSSH 
   artifacts:
     paths:
