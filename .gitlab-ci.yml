@@ -139,20 +139,27 @@ build_frontend:
     expire_in: 1 hour
   when: manual
 
-  
-# Certificate creation/renewal job
+
 certificates:
   stage: certs
-  image: ubuntu:24.04
+  extends: .ssh_base
   script:
-    - apt-get update && apt-get install -y software-properties-common
-    - add-apt-repository universe
-    - apt-get update && apt-get install -y certbot
-    # Generate certificate using standalone HTTP challenge
-    - mkdir -p certbot/www certbot/certs || echo "Failed to create directories"
-    - certbot -h
-    - certbot certonly --webroot --webroot-path certbot/www -d steamednotes.com,www.steamednotes.com -m "$EMAIL" --agree-tos --non-interactive --verbose || echo "Certbot failed, check logs"
-    - ls -la certbot/certs/live/steamednotes.com || echo "No certificates found"
+    - |
+      ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
+        set -x
+        cd ~/app 
+        echo  "Pulling certbot container"
+        docker pull certbot/certbot
+        [ -d ./certbot ] || mkdir certbot
+        docker run -it --rm \
+        -v ./certbot/certs:/etc/letsencrypt \
+        -v ./certbot/www:/var/www \
+        certbot/certbot certonly \
+        --webroot -w /var/www \
+        -d steamednotes.com,www.steamednotes.com \
+        -m $EMAIL \
+        --agree-tos --non-interactive --verbose
+      ENDSSH 
   artifacts:
     paths:
       - certbot/certs/
