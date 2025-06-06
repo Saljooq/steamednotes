@@ -157,9 +157,10 @@ certificates:
         docker rm app_frontend_1
         docker stop nginx_temp
         docker rm nginx_temp
-        docker run -d --name nginx_temp \
+        docker run --rm -d --name nginx_temp \
           -p 80:80 \
-          -v ./frontend/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+          -v ./dist:/usr/share/nginx/html \
+          -v ./frontend/nginx/temp_80_only/nginx.conf:/etc/nginx/nginx.conf:ro \
           -v ./certbot/certs:/etc/letsencrypt \
           -v ./certbot/www:/var/www/certbot \
           nginx:alpine
