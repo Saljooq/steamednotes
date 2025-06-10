@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 interface SignInProps {
   onSignIn: (user: string) => void;
@@ -8,6 +9,31 @@ interface FormData {
   email: string;
   password: string;
 }
+
+const Typewriter: React.FC<{ text: string; speed: number }> = ({ text, speed = 100 }) => {
+  const [displayedText, setDisplayedText] = useState('');
+
+  useEffect(() => {
+    let index = 0;
+    const timer = setInterval(() => {
+      if (index <= text.length) {
+        setDisplayedText(text.slice(0, index));
+        index++;
+      } else {
+        clearInterval(timer);
+      }
+    }, speed);
+
+    return () => clearInterval(timer);
+  }, [text, speed]);
+
+  return (
+    <div className="text-2xl font-mono text-gray-800 text-center mb-6 relative w-full">
+      {displayedText}
+      <span className="inline-block w-0.5 h-6 bg-gray-800 animate-blink ml-1 align-middle" />
+    </div>
+  );
+};
 
 export function SignIn({ onSignIn }: SignInProps) {
   const [formData, setFormData] = useState<FormData>({
@@ -69,7 +95,9 @@ export function SignIn({ onSignIn }: SignInProps) {
   };
 
   return (
-    <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,_#e0e0e0_25px,_#e0e0e0_26px)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,_#e0e0e0_25px,_#e0e0e0_26px)] flex flex-col items-center justify-center p-4">
+      <Typewriter text="All your notes in one place" speed={80} />
+      <br />
       <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Sign In
@@ -125,12 +153,11 @@ export function SignIn({ onSignIn }: SignInProps) {
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <a
-            href="/signup"
+          <Link to="/signup"
             className="font-medium text-indigo-600 hover:text-indigo-500"
           >
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
