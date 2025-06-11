@@ -95,7 +95,7 @@ func (conn ConnectionData) signIn(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 		})
 
-		fmt.Fprintf(w, "Signed in as %s", creds.Email)
+		fmt.Printf("Signed in as %s", creds.Email)
 
 		json.NewEncoder(w).Encode(map[string]string{"username": user.Username})
 		return
