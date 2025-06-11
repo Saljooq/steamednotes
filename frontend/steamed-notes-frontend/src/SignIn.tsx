@@ -10,31 +10,38 @@ interface FormData {
   password: string;
 }
 
-const Typewriter: React.FC<{ text: string; speed: number }> = ({ text, speed = 100 }) => {
-  const [displayedText, setDisplayedText] = useState('');
+const Typewriter: React.FC<{ text: string; speed: number }> = ({ text, speed }) => {
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    let index = 0;
-    const timer = setInterval(() => {
-      if (index <= text.length) {
-        setDisplayedText(text.slice(0, index));
-        index++;
-      } else {
-        clearInterval(timer);
-      }
-    }, speed);
-
-    return () => clearInterval(timer);
-  }, [text, speed]);
+    if (index < text.length) {
+      const timer = setTimeout(() => {
+        setIndex(index + 1);
+      }, speed);
+      return () => clearTimeout(timer);
+    }
+  }, [index, text, speed]);
 
   return (
-    <div className="text-2xl font-mono text-gray-800 text-center mb-6 relative w-full">
-      {displayedText}
-      <span className="inline-block w-0.5 h-6 bg-gray-800 animate-blink ml-1 align-middle" />
-    </div>
+    <>
+      <style>
+        {`
+          @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+          }
+          .animate-blink {
+            animation: blink 0.7s step-end infinite;
+          }
+        `}
+      </style>
+      <div className="w-full max-w-md text-2xl font-mono text-gray-800 text-center mb-8 relative whitespace-nowrap overflow-hidden">
+        {text.slice(0, index)}
+          <span className="inline-block w-0.5 h-6 bg-gray-800 animate-blink ml-1 align-middle" />
+      </div>
+    </>
   );
 };
-
 export function SignIn({ onSignIn }: SignInProps) {
   const [formData, setFormData] = useState<FormData>({
     email: "",
