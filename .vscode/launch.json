@@ -19,8 +19,8 @@
             "name": "Launch Frontend",
             "type": "node-terminal",
             "request": "launch",
-            "command": "npm run dev",  // Chain commands
-            "cwd": "${workspaceFolder}/frontend/steamed-notes-frontend", // Optional: Specify the working directory
+            "command": "npm run dev",
+            "cwd": "${workspaceFolder}/frontend/steamed-notes-frontend",
             "skipFiles": [
                 "<node_internals>/**"
             ]
