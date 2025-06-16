@@ -107,6 +107,10 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type CreateRoomRequest struct {
+	RoomName string `json:"roomname"`
+}
+
 func (conn ConnectionData) createRoom(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.Header.Get("id")
@@ -118,13 +122,45 @@ func (conn ConnectionData) createRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = conn.queries.CreateRoom(r.Context(), db.CreateRoomParams{Name: "", UserID: int32(iuserID)})
+	var room CreateRoomRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&room); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	err = conn.queries.CreateRoom(r.Context(), db.CreateRoomParams{Name: room.RoomName, UserID: int32(iuserID)})
 
 	if err != nil {
 		http.Error(w, "Invalid request, perhaps name already used", http.StatusConflict)
+		fmt.Printf("Error in creating a room: %s", err.Error())
 	} else {
 		w.WriteHeader(http.StatusCreated)
 	}
+}
+
+func (conn ConnectionData) getRooms(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Header.Get("id")
+
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
+	}
+
+	fmt.Printf("Processing getRooms for %d\n", iuserID)
+
+	rooms, err := conn.queries.FindRoomsByUser(r.Context(), int32(iuserID))
+
+	if err != nil {
+		fmt.Printf("Error fetching rooms. Error: %s", err.Error())
+		json.NewEncoder(w).Encode([]db.Room{})
+	} else {
+		json.NewEncoder(w).Encode(rooms)
+	}
+
 }
 
 // func createFolder(w http.ResponseWriter, r *http.Request) {}

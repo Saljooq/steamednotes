@@ -7,6 +7,8 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createRoom = `-- name: CreateRoom :exec
@@ -25,25 +27,26 @@ func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) error {
 }
 
 const findRoomsByUser = `-- name: FindRoomsByUser :many
-SELECT id, name, user_id, created_at FROM rooms 
+SELECT id, name, created_at FROM rooms 
 where user_id=$1
 `
 
-func (q *Queries) FindRoomsByUser(ctx context.Context, userID int32) ([]Room, error) {
+type FindRoomsByUserRow struct {
+	ID        int32
+	Name      string
+	CreatedAt pgtype.Timestamp
+}
+
+func (q *Queries) FindRoomsByUser(ctx context.Context, userID int32) ([]FindRoomsByUserRow, error) {
 	rows, err := q.db.Query(ctx, findRoomsByUser, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Room
+	var items []FindRoomsByUserRow
 	for rows.Next() {
-		var i Room
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.UserID,
-			&i.CreatedAt,
-		); err != nil {
+		var i FindRoomsByUserRow
+		if err := rows.Scan(&i.ID, &i.Name, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

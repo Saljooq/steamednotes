@@ -11,12 +11,13 @@ import (
 
 	"steamednotes/db" // Adjust based on your module path
 
-	"github.com/jackc/pgx/v5"
+	// "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Dummy user struct
 type User struct {
-	Email string
+	Email    string
 	Password string // Plaintext for now—hash later
 }
 
@@ -50,14 +51,14 @@ func main() {
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 
-	conn, err := pgx.Connect(context.Background(), connStr)
+	conn, err := pgxpool.New(context.Background(), connStr)
 	if err != nil {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	} else {
 		log.Printf("Successfully connected to the db")
 	}
 
-	defer conn.Close(context.Background())
+	defer conn.Close()
 
 	// HTTP server
 	// mux := http.NewServeMux()
@@ -106,7 +107,8 @@ func main() {
 	http.HandleFunc("/api/signin", conData.signIn)
 
 	http.HandleFunc("/api/users/create", createUser)
-	http.HandleFunc("/api/rooms/create", authMiddleware(conData.createRoom))
+	http.HandleFunc("POST /api/rooms/create", authMiddleware(conData.createRoom))
+	http.HandleFunc("/api/rooms/get", authMiddleware(conData.getRooms))
 	// http.HandleFunc("/api/folders/create", authMiddleware(createFolder))
 
 	fmt.Println("Server starting on :8080")
