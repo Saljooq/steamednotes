@@ -19,12 +19,10 @@ function App() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [newNote, setNewNote] = useState("");
 
-  const apiUrl = window.location.origin;
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch(`${apiUrl}/api/notes`, {
+        const res = await fetch(`/api/notes`, {
           credentials: "include",
         });
         setHasCheckedSignIn(true);
@@ -42,7 +40,7 @@ function App() {
   }, []);
 
   const fetchNotes = async () => {
-    const res = await fetch(`${apiUrl}/api/notes`, {
+    const res = await fetch(`/api/notes`, {
       headers: { "X-Username": username },
       credentials: "include",
     });
@@ -56,7 +54,7 @@ function App() {
 
   const handleCreateNote = async (e: React.FormEvent) => {
     e.preventDefault();
-    const res = await fetch(`${apiUrl}/api/notes/create`, {
+    const res = await fetch(`/api/notes/create`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
