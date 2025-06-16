@@ -111,6 +111,8 @@ func main() {
 	http.HandleFunc("/api/rooms/get", authMiddleware(conData.getRooms))
 	// http.HandleFunc("/api/folders/create", authMiddleware(createFolder))
 
+	http.HandleFunc("GET /api/users/issignedin", authMiddleware(isSignedIn))
+
 	fmt.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", nil)
 }
