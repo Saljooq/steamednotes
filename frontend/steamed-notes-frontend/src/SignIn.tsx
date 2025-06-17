@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface SignInProps {
   onSignIn: (user: string) => void;
@@ -42,13 +42,14 @@ const Typewriter: React.FC<{ text: string; speed: number }> = ({ text, speed }) 
     </>
   );
 };
-export function SignIn({ onSignIn }: SignInProps) {
+export function SignIn() {
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  let navigate = useNavigate();
 
   const validateForm = (): Partial<FormData> => {
     const newErrors: Partial<FormData> = {};
@@ -80,7 +81,8 @@ export function SignIn({ onSignIn }: SignInProps) {
           credentials: "include",
         });
         if (res.ok) {
-          onSignIn(formData.email); // Pass username up
+          // onSignIn(formData.email); // Pass username up
+          navigate("/rooms")
         } else {
           alert("Sign-in failed: " + (await res.text()));
         }
