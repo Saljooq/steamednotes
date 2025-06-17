@@ -163,7 +163,8 @@ func (conn ConnectionData) getRooms(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// func createFolder(w http.ResponseWriter, r *http.Request) {}
+func createFolder(w http.ResponseWriter, r *http.Request) {}
+func getFolder(w http.ResponseWriter, r *http.Request)    {}
 
 func isSignedIn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"Result": "Success"})

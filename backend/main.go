@@ -102,14 +102,15 @@ func main() {
 		json.NewEncoder(w).Encode(user)
 	})
 
-	http.HandleFunc("/api/notes", authMiddleware(getNotes))
-	http.HandleFunc("/api/notes/create", authMiddleware(createNote))
-	http.HandleFunc("/api/signin", conData.signIn)
+	http.HandleFunc("GET /api/notes", authMiddleware(getNotes))
+	http.HandleFunc("GET /api/notes/create", authMiddleware(createNote))
+	http.HandleFunc("GET /api/signin", conData.signIn)
 
-	http.HandleFunc("/api/users/create", createUser)
+	http.HandleFunc("GET /api/users/create", createUser)
 	http.HandleFunc("POST /api/rooms/create", authMiddleware(conData.createRoom))
-	http.HandleFunc("/api/rooms/get", authMiddleware(conData.getRooms))
-	// http.HandleFunc("/api/folders/create", authMiddleware(createFolder))
+	http.HandleFunc("GET /api/rooms/get", authMiddleware(conData.getRooms))
+	http.HandleFunc("POST /api/folders/create", authMiddleware(createFolder))
+	http.HandleFunc("GET /api/folders/get", authMiddleware(getFolder))
 
 	http.HandleFunc("GET /api/users/issignedin", authMiddleware(isSignedIn))
 
