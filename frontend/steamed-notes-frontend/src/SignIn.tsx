@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-interface SignInProps {
-  onSignIn: (user: string) => void;
-}
 
 interface FormData {
   email: string;
