@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import LoadingScreen from './Loading';
 
 interface Room {
   // key: string,
@@ -7,7 +9,8 @@ interface Room {
   CreatedAt: string;
 }
 type RoomHandler = (rooms: Room[]) => void;
-const fetchRooms = (setRoom: RoomHandler) => {
+type setIsLoadingProp = (isLoading:boolean) => void;
+const fetchRooms = (setRoom: RoomHandler, setIsLoading: setIsLoadingProp) => {
   fetch(
       '/api/rooms/get'
     ).then((response) => {
@@ -19,16 +22,12 @@ const fetchRooms = (setRoom: RoomHandler) => {
     })
     .then((data) => {
       console.log("Data received:", data);
-      // let dataWithKey: Room[] = []
       if (data != null) {
-        // for (const el of data){
-        //   dataWithKey.push({...el, key: el.ID})
-        //   console.log("Data with key")
-        //   console.log(dataWithKey)
-        // }
         setRoom(data)
+        setIsLoading(false);
       } else {
-        setRoom([])
+        setRoom([]);
+        setIsLoading(false);
       }
     })
     .catch((error) => {
@@ -123,41 +122,12 @@ const CreateRoomModal: React.FC<{
 const RoomsScreen: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // TODO: Implement API call to fetch rooms
-    // Example: fetch('/api/rooms').then(res => res.json()).then(data => setRooms(data));
-    // Simulated data for demonstration
-
-    // fetch(
-    //   '/api/rooms/get'
-    // ).then((response) => {
-    //   if (response.ok){
-    //     return response.json(); // Parse JSON if response is OK
-    //   } else {
-    //     throw new Error("Response was not okay")
-    //   }
-    // })
-    // .then((data) => {
-    //   console.log("Data received:", data);
-    //   if (data != null) {
-    //     setRooms(data)
-    //   } else {
-    //     setRooms([])
-    //   }
-    // })
-    // .catch((error) => {
-    //   console.error("Fetch error:", error);
-    // });
-
-    fetchRooms(setRooms)
-
-
-    // const dummyRooms: Room[] = [
-    //   // { id: '1', name: 'Meeting Room A' },
-    //   // { id: '2', name: 'Creative Space' },
-    // ];
-    // setRooms(dummyRooms);
+    fetchRooms(setRooms, setIsLoading)
   }, []);
 
   const handleCreateRoom = async (name: string) => {
@@ -166,6 +136,7 @@ const RoomsScreen: React.FC = () => {
       // Example: await fetch('/api/rooms', { method: 'POST', body: JSON.stringify({ name }) });
       console.log('Creating new room:', name);
 
+      setIsLoading(true)
       fetch('/api/rooms/create', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
@@ -175,7 +146,7 @@ const RoomsScreen: React.FC = () => {
           throw new Error("Error when calling create room")
         }
       }).then((_) => {
-        fetchRooms(setRooms)
+        fetchRooms(setRooms, setIsLoading)
       })
         
     } catch (error) {
@@ -187,6 +158,7 @@ const RoomsScreen: React.FC = () => {
   return (
     <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex items-center justify-center p-4">
       <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-2xl">
+        { isLoading ? <LoadingScreen msg="Loading rooms..."/> : ( <>
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Your Rooms</h2>
         {rooms.length === 0 ? (
           <div className="text-center py-8">
@@ -199,7 +171,8 @@ const RoomsScreen: React.FC = () => {
             {rooms.map((room) => (
               <div
                 key={room.ID}
-                className="bg-yellow-50 p-4 rounded-md border border-gray-200 shadow-sm"
+                className="bg-yellow-50 p-4 rounded-md border border-gray-200 shadow-sm cursor-pointer hover:bg-yellow-200"
+                onClick={() => navigate("/rooms/" + room.ID)}
               >
                 <h3 className="text-md font-medium text-gray-800">{room.Name}</h3>
               </div>
@@ -212,6 +185,7 @@ const RoomsScreen: React.FC = () => {
         >
           Create New Room
         </button>
+        </>)}
         <CreateRoomModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
