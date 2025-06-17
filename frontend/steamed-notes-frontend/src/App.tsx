@@ -4,6 +4,8 @@ import { SignIn } from "./SignIn";
 import Terminal from "./terminal/Terminal"
 import SignupForm from "./CreateUser";
 import RoomsScreen from "./Rooms";
+import LoadingScreen from "./Loading";
+import FoldersScreen from "./Folders";
 
 
 function App() {
@@ -30,23 +32,6 @@ function App() {
   }, []);
 
 
-const LoadingScreen = () => {
-  return (
-    <div className="fixed inset-0 bg-yellow-50 bg-opacity-90 flex items-center justify-center z-50">
-      <div className="bg-yellow-100 p-8 rounded-lg shadow-lg max-w-md text-center">
-        <div className="flex justify-center mb-4">
-          <span className="text-4xl animate-pulse">✏️</span>
-        </div>
-        <p className="text-xl font-mono text-gray-800">
-          Loading your notes...
-          <span className="inline-block w-0.5 h-5 bg-gray-800 animate-blink ml-1 align-middle" />
-        </p>
-      </div>
-    </div>
-  );
-};
-
-
   return (
     <BrowserRouter>
       <Routes>
@@ -54,13 +39,14 @@ const LoadingScreen = () => {
           path="/signin"
           element={
             hasCheckedSignIn ? ( signedIn ? <Navigate to="/rooms" /> : <SignIn /> ) 
-            : <LoadingScreen/>
+            : <LoadingScreen msg="Loading your notes..." />
           }
         />
         <Route path="/signup" element={<SignupForm/>} />
         <Route path="terminal" element={<Terminal/>}/>
         <Route path="/" element={<Navigate to="/signin" />} />
         <Route path="/rooms" element={<RoomsScreen/>} />
+        <Route path="/rooms/:roomId" element={<FoldersScreen/>} />
       </Routes>
     </BrowserRouter>
   )
