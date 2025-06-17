@@ -103,8 +103,8 @@ func main() {
 	})
 
 	http.HandleFunc("GET /api/notes", authMiddleware(getNotes))
-	http.HandleFunc("GET /api/notes/create", authMiddleware(createNote))
-	http.HandleFunc("GET /api/signin", conData.signIn)
+	http.HandleFunc("POST /api/notes/create", authMiddleware(createNote))
+	http.HandleFunc("POST /api/signin", conData.signIn)
 
 	http.HandleFunc("GET /api/users/create", createUser)
 	http.HandleFunc("POST /api/rooms/create", authMiddleware(conData.createRoom))
