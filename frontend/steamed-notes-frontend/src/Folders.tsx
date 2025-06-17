@@ -1,0 +1,181 @@
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+
+interface Folder {
+  id: string;
+  name: string;
+  roomId: string;
+}
+
+const CreateFolderModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onCreate: (name: string) => Promise<void>;
+}> = ({ isOpen, onClose, onCreate }) => {
+  const [folderName, setFolderName] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const validateName = (name: string): string => {
+    if (!name.trim()) return 'Folder name is required';
+    return '';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const validationError = validateName(folderName);
+    setError(validationError);
+
+    if (!validationError) {
+      setIsSubmitting(true);
+      try {
+        await onCreate(folderName);
+        setFolderName('');
+        onClose();
+      } catch {
+        setError('Failed to create folder');
+      } finally {
+        setIsSubmitting(false);
+      }
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-yellow-100 p-6 rounded-lg shadow-lg w-full max-w-md">
+        <h3 className="text-lg font-bold text-gray-800 mb-4">Create New Folder</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="folderName" className="block text-sm font-medium text-gray-700">Folder Name</label>
+            <input
+              type="text"
+              id="folderName"
+              value={folderName}
+              onChange={(e) => {
+                setFolderName(e.target.value);
+                setError('');
+              }}
+              autoFocus
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="Enter folder name"
+            />
+            {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+          </div>
+          <div className="flex justify-end space-x-2">
+            <button
+              type="button"
+              onClick={() => {
+                setFolderName('');
+                setError('');
+                onClose();
+              }}
+              className="py-2 px-4 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="py-2 px-4 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none disabled:opacity-50"
+            >
+              {isSubmitting ? 'Creating...' : 'Create'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const FoldersScreen: React.FC = () => {
+  const { roomId } = useParams<{ roomId: string }>();
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!roomId) {
+      navigate('/rooms');
+      return;
+    }
+    let mounted = true;
+    setIsLoading(true);
+    setError('');
+    // TODO: Fetch folders for roomId
+    // Example: fetch(`/api/rooms/${roomId}/folders`).then(res => res.json()).then(data => setFolders(data));
+    const dummyFolders: Folder[] = [
+      { id: '1', name: 'Work Notes', roomId },
+      // { id: '2', name: 'Personal', roomId },
+    ];
+    setTimeout(() => {
+      if (mounted) {
+        setFolders(dummyFolders);
+        setIsLoading(false);
+      }
+    }, 500); // Simulate API delay
+    return () => { mounted = false; };
+  }, [roomId, navigate]);
+
+  const handleCreateFolder = async (name: string) => {
+    try {
+      // TODO: Create folder via API
+      // Example: await fetch(`/api/rooms/${roomId}/folders`, { method: 'POST', body: JSON.stringify({ name }) });
+      console.log('Creating folder:', name);
+      setFolders((prev) => [
+        ...prev,
+        { id: Date.now().toString(), name, roomId: roomId! },
+      ]);
+    } catch (error) {
+      console.error('Error creating folder:', error);
+      throw error;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex items-center justify-center p-4">
+      <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-2xl">
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Folders in Room</h2>
+        {isLoading ? (
+          <p className="text-center text-gray-600">Loading folders...</p>
+        ) : error ? (
+          <p className="text-center text-red-600">{error}</p>
+        ) : folders.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-5xl mb-4">🙁</p>
+            <p className="text-lg italic text-gray-700 shadow-sm">No Folders Available</p>
+            <p className="text-sm text-gray-600 mt-2">Create a new folder to get started!</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {folders.map((folder) => (
+              <div
+                key={folder.id}
+                className="bg-yellow-50 p-4 rounded-md border border-gray-200 shadow-sm cursor-pointer hover:bg-yellow-200"
+                // TODO: Navigate to notes in folder
+              >
+                <h3 className="text-md font-medium text-gray-800">{folder.name}</h3>
+              </div>
+            ))}
+          </div>
+        )}
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Create New Folder
+        </button>
+        <CreateFolderModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onCreate={handleCreateFolder}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default FoldersScreen;
