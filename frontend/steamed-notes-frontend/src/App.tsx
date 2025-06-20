@@ -11,6 +11,7 @@ import FoldersScreen from "./Folders";
 function App() {
   const [signedIn, setSignedIn] = useState(false);
   const [ hasCheckedSignIn, setHasCheckedSignIn] = useState(false);
+  const [loggedOut, setLoggedOut] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -29,7 +30,7 @@ function App() {
       } 
     };
     checkAuth();
-  }, []);
+  }, [loggedOut]);
 
 
   return (
@@ -45,8 +46,8 @@ function App() {
         <Route path="/signup" element={<SignupForm/>} />
         <Route path="terminal" element={<Terminal/>}/>
         <Route path="/" element={<Navigate to="/signin" />} />
-        <Route path="/rooms" element={<RoomsScreen/>} />
-        <Route path="/rooms/:roomId" element={<FoldersScreen/>} />
+        <Route path="/rooms" element={<RoomsScreen setLoggedOut={setLoggedOut} />} />
+        <Route path="/rooms/:roomId" element={<FoldersScreen setLoggedOut={setLoggedOut}/>} />
       </Routes>
     </BrowserRouter>
   )

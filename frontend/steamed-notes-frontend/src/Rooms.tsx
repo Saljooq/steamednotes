@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoadingScreen from './Loading';
+import Breadcrumb from './Breadcrumbs';
+import UserMenu from './UserMenu';
+import { logout } from './helper/Logout';
 
 interface Room {
   // key: string,
@@ -119,7 +122,11 @@ const CreateRoomModal: React.FC<{
   );
 };
 
-const RoomsScreen: React.FC = () => {
+interface RoomScreenProp {
+  setLoggedOut: (loggedOut: boolean) => void;
+}
+
+const RoomsScreen: React.FC<RoomScreenProp> = ({setLoggedOut}) => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -156,9 +163,13 @@ const RoomsScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex  justify-center p-4">
       <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-2xl">
         { isLoading ? <LoadingScreen msg="Loading rooms..."/> : ( <>
+        <div className="flex items-center justify-between mb-4">
+          <Breadcrumb />
+          <UserMenu initials="SA" onLogout={() => logout(navigate, setLoggedOut)} />
+        </div>
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Your Rooms</h2>
         {rooms.length === 0 ? (
           <div className="text-center py-8">

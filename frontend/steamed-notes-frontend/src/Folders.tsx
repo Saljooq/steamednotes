@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, NavigateFunction } from 'react-router-dom';
+import Breadcrumb from './Breadcrumbs';
+import UserMenu from './UserMenu';
+import { logout } from './helper/Logout';
 
 interface Folder {
   id: string;
@@ -89,7 +92,11 @@ const CreateFolderModal: React.FC<{
   );
 };
 
-const FoldersScreen: React.FC = () => {
+interface FolderScreenProp {
+  setLoggedOut: (loggedOut: boolean) => void;
+}
+
+const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
   const { roomId } = useParams<{ roomId: string }>();
   const [folders, setFolders] = useState<Folder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -135,10 +142,11 @@ const FoldersScreen: React.FC = () => {
     }
   };
 
+
   return (
-    <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex justify-center p-4">
       <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-2xl">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Folders in Room</h2>
+        {/* <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Folders in Room</h2> */}
         {isLoading ? (
           <p className="text-center text-gray-600">Loading folders...</p>
         ) : error ? (
@@ -150,8 +158,13 @@ const FoldersScreen: React.FC = () => {
             <p className="text-sm text-gray-600 mt-2">Create a new folder to get started!</p>
           </div>
         ) : (
+          <>
+          <div className="flex items-center justify-between mb-4">
+          <Breadcrumb room={{id:roomId!, name:"holder"}}/>
+          <UserMenu initials="SA" onLogout={() => logout(navigate, setLoggedOut)} />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {folders.map((folder) => (
+            {/* {folders.map((folder) => (
               <div
                 key={folder.id}
                 className="bg-yellow-50 p-4 rounded-md border border-gray-200 shadow-sm cursor-pointer hover:bg-yellow-200"
@@ -159,8 +172,16 @@ const FoldersScreen: React.FC = () => {
               >
                 <h3 className="text-md font-medium text-gray-800">{folder.name}</h3>
               </div>
-            ))}
-          </div>
+            ))} */}
+            {folders.map((folder) => (
+            <div
+              key={folder.id}
+              className="flex items-center space-x-3 p-4 bg-yellow-200 border border-yellow-300 rounded-lg shadow-sm cursor-pointer hover:bg-yellow-300 transition"
+            >
+              <div className="text-yellow-700 text-2xl">📁</div>
+              <div className="text-gray-800 font-semibold">{folder.name}</div>
+            </div>))}
+          </div></>
         )}
         <button
           onClick={() => setIsModalOpen(true)}
