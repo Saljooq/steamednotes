@@ -165,6 +165,16 @@ func (conn ConnectionData) getRooms(w http.ResponseWriter, r *http.Request) {
 
 func createFolder(w http.ResponseWriter, r *http.Request) {}
 func getFolder(w http.ResponseWriter, r *http.Request)    {}
+func (conn ConnectionData) logout(w http.ResponseWriter, r *http.Request) {
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Expires:  time.Now(),
+		HttpOnly: true, // Prevent JS access
+		Path:     "/",
+	})
+}
 
 func isSignedIn(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"Result": "Success"})
