@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate, NavigateFunction } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Breadcrumb from './Breadcrumbs';
 import UserMenu from './UserMenu';
 import { logout } from './helper/Logout';

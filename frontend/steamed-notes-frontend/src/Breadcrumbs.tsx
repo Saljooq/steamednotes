@@ -1,5 +1,5 @@
 // Breadcrumb.tsx
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 interface NavData {
   id: string,
@@ -17,15 +17,6 @@ const Breadcrumb: React.FC<{
   note?: NavData
 }> = ({room=null, folder=null, note=null}) => {
   const navigate = useNavigate()
-  // const location = useLocation()
-
-  // const parts = location.pathname
-  //   .split('/')
-  //   .filter(Boolean) // remove empty strings
-  //   .map((part, index, arr) => ({
-  //     label: decodeURIComponent(part),
-  //     path: '/' + arr.slice(0, index + 1).join('/')
-  //   }))
 
   var parts: NavPart[] = [{label:"root", path:"/rooms"}];
 
