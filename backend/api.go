@@ -170,8 +170,9 @@ func (conn ConnectionData) logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    "",
-		Expires:  time.Now(),
-		HttpOnly: true, // Prevent JS access
+		Expires:  time.Unix(0, 0), // Unix epoch: Jan 1, 1970
+		MaxAge:   -1,              // Immediately delete in all browsers
+		HttpOnly: true,
 		Path:     "/",
 	})
 }

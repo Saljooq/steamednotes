@@ -123,7 +123,7 @@ const CreateRoomModal: React.FC<{
 };
 
 interface RoomScreenProp {
-  setLoggedOut: (loggedOut: boolean) => void;
+  setLoggedOut: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const RoomsScreen: React.FC<RoomScreenProp> = ({setLoggedOut}) => {

@@ -93,7 +93,7 @@ const CreateFolderModal: React.FC<{
 };
 
 interface FolderScreenProp {
-  setLoggedOut: (loggedOut: boolean) => void;
+  setLoggedOut: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {

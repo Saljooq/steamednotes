@@ -11,10 +11,13 @@ import FoldersScreen from "./Folders";
 function App() {
   const [signedIn, setSignedIn] = useState(false);
   const [ hasCheckedSignIn, setHasCheckedSignIn] = useState(false);
-  const [loggedOut, setLoggedOut] = useState(false);
+  const [loggedOutToggle, setLoggedOut] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
+      setSignedIn(false);
+      setHasCheckedSignIn(false);
+      console.log("Running use effect")
       try {
         const res = await fetch(`/api/users/issignedin`, {
           credentials: "include",
@@ -30,7 +33,7 @@ function App() {
       } 
     };
     checkAuth();
-  }, [loggedOut]);
+  }, [loggedOutToggle]);
 
 
   return (
