@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 interface FormData {
   name: string;
@@ -15,6 +15,7 @@ export default function SignupForm() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   const validateForm = (): Partial<FormData> => {
     const newErrors: Partial<FormData> = {};
@@ -41,23 +42,26 @@ export default function SignupForm() {
       setIsSubmitting(true);
       try {
         // TODO: Implement API call for signup
-        const res = await fetch('/api/adduser', {
+        fetch('/api/adduser', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({username: formData.name, email: formData.email, passwordhash: formData.password
-        })});
-        if (res.status == 200){
-          console.log("Form submitted:", formData);
-          <Navigate to='/signin'/>
-        } else {
-          console.log("Encountered error when creating the user");
-        }
-        // Reset form after successful submission
-        setFormData({ name: "", email: "", password: "" });
+        })}).then(
+          res => {
+            // Reset form after successful submission
+            setFormData({ name: "", email: "", password: "" });
+            setIsSubmitting(false);
+            if (res.ok){
+              console.log("Form submitted:", formData);
+              navigate('/signin')
+            } else {
+              setErrors({ email: "An error occurred during signup" });
+            }
+          }
+        );
+        
       } catch (error) {
         setErrors({ email: "An error occurred during signup" });
-      } finally {
-        setIsSubmitting(false);
       }
     }
   };
