@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 const host = window.location.host;  // includes domain and port if any
 // const WS_URL = `${protocol}//${host}/api/ws`;  // Adjust path as needed
 
-const PROTOCOL = host === "www.steamednotes.com" ? "wss" : "ws";
+const PROTOCOL = window.location.protocol === "https:" ? "wss" : "ws";
 
 const WS_URL = `${PROTOCOL}://${host}/api/ws`; // Replace with your WS URL
 
