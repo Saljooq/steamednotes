@@ -6,6 +6,7 @@ import SignupForm from "./CreateUser";
 import RoomsScreen from "./Rooms";
 import LoadingScreen from "./Loading";
 import FoldersScreen from "./Folders";
+import WebSocketComponent from "./Messages";
 
 
 function App() {
@@ -42,7 +43,7 @@ function App() {
         <Route
           path="/signin"
           element={
-            hasCheckedSignIn ? ( signedIn ? <Navigate to="/rooms" /> : <SignIn /> ) 
+            hasCheckedSignIn ? ( signedIn ? <RoomsScreen setLoggedOut={setLoggedOut}/> : <SignIn /> ) 
             : <LoadingScreen msg="Loading your notes..." />
           }
         />
@@ -51,6 +52,7 @@ function App() {
         <Route path="/" element={<Navigate to="/signin" />} />
         <Route path="/rooms" element={<RoomsScreen setLoggedOut={setLoggedOut} />} />
         <Route path="/rooms/:roomId" element={<FoldersScreen setLoggedOut={setLoggedOut}/>} />
+        <Route path="/messages" element={<WebSocketComponent/>} />
       </Routes>
     </BrowserRouter>
   )
