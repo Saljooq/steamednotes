@@ -114,9 +114,11 @@ func main() {
 
 	http.HandleFunc("GET /api/users/issignedin", authMiddleware(isSignedIn))
 
-
 	http.HandleFunc("POST /api/logout", authMiddleware(conData.logout))
 	// await fetch('/api/logout', { method: 'POST', credentials: 'include' })
+
+	http.HandleFunc("/api/ws", authMiddleware(handleWebSocket))
+
 	fmt.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", nil)
 }
