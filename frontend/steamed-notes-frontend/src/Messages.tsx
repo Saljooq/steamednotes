@@ -3,7 +3,9 @@ import React, { useEffect, useRef, useState } from "react";
 const host = window.location.host;  // includes domain and port if any
 // const WS_URL = `${protocol}//${host}/api/ws`;  // Adjust path as needed
 
-const WS_URL = `ws://${host}/api/ws`; // Replace with your WS URL
+const PROTOCOL = host === "www.steamednotes.com" ? "wss" : "ws";
+
+const WS_URL = `${PROTOCOL}://${host}/api/ws`; // Replace with your WS URL
 
 const WebSocketComponent: React.FC = () => {
   const ws = useRef<WebSocket | null>(null);
