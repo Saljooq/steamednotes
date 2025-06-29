@@ -3,11 +3,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Breadcrumb from './Breadcrumbs';
 import UserMenu from './UserMenu';
 import { logout } from './helper/Logout';
+import LoadingScreen from './Loading';
 
 interface Folder {
   id: string;
   name: string;
   roomId: string;
+}
+
+interface FolderAPIInterface{
+  ID: string;
+  Name: string;
+  CreatedAt: EpochTimeStamp;
+}
+
+function transformFromApiToFolder(input: FolderAPIInterface, roomId: string): Folder{
+  return {id: input.ID, name: input.Name, roomId: roomId} as Folder
 }
 
 const CreateFolderModal: React.FC<{
@@ -98,10 +109,13 @@ interface FolderScreenProp {
 
 const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
   const { roomId } = useParams<{ roomId: string }>();
+  const [ roomName, setRoomName ] = useState<string>();
+  const [ isLoadingRoomDetails, setIsLoadingRoomDetails ] = useState(true);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingFolders, setIsLoadingFolders] = useState(true);
   const [error, setError] = useState('');
+  const [refreshToggle, setRefreshToggle] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -110,35 +124,103 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
       return;
     }
     let mounted = true;
-    setIsLoading(true);
+    setIsLoadingFolders(true);
+    setIsLoadingRoomDetails(true);
     setError('');
     // TODO: Fetch folders for roomId
     // Example: fetch(`/api/rooms/${roomId}/folders`).then(res => res.json()).then(data => setFolders(data));
-    const dummyFolders: Folder[] = [
-      { id: '1', name: 'Work Notes', roomId },
-      // { id: '2', name: 'Personal', roomId },
-    ];
-    setTimeout(() => {
-      if (mounted) {
-        setFolders(dummyFolders);
-        setIsLoading(false);
+    
+    fetch(`/api/folders/get?room_id=${roomId}`).then((response) => {
+      if (response.ok){
+        return response.json(); // Parse JSON if response is OK
+      } else {
+        throw new Error("Response was not okay, status:" + response.status + " " + response.statusText)
       }
-    }, 500); // Simulate API delay
+    })
+    .then((data) => {
+      if (data != null) {
+        let foldersData: FolderAPIInterface[] = data as  FolderAPIInterface[]
+        let transformedData: Folder[] = foldersData.map(x => transformFromApiToFolder(x, roomId))
+
+        setFolders(transformedData)
+        setIsLoadingFolders(false);
+      } else {
+        setFolders([]);
+        setIsLoadingFolders(false);
+      }
+    })
+    .catch((err) => {
+      console.error("Fetch error:", error);
+      updateError(err)
+    });
+
+
+
+    fetch(`/api/rooms/getdetails?room_id=${roomId}`).then((response) => {
+      if (response.ok){
+        return response.json(); // Parse JSON if response is OK
+      } else {
+        throw new Error("Response was not okay, status:" + response.status + " " + response.statusText)
+      }
+    })
+    .then((data) => {
+      if (data != null) {
+        setRoomName(data.room_name)
+        setIsLoadingRoomDetails(false);
+      } else {
+        setRoomName('')
+        setIsLoadingRoomDetails(false);
+      }
+    })
+    .catch((err) => {
+      console.error("Fetch error:", error);
+      updateError(err)
+    });
+
     return () => { mounted = false; };
-  }, [roomId, navigate]);
+  }, [roomId, refreshToggle]);
+
+  function updateError(err: string){
+      setError(old => {
+        if (old === '') {
+          return err
+        } else {
+          return old + "\n" + err
+        }
+      })
+      throw err;
+    }
+
 
   const handleCreateFolder = async (name: string) => {
     try {
       // TODO: Create folder via API
       // Example: await fetch(`/api/rooms/${roomId}/folders`, { method: 'POST', body: JSON.stringify({ name }) });
       console.log('Creating folder:', name);
-      setFolders((prev) => [
-        ...prev,
-        { id: Date.now().toString(), name, roomId: roomId! },
-      ]);
-    } catch (error) {
-      console.error('Error creating folder:', error);
-      throw error;
+
+    fetch(`/api/folders/create`, 
+       { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ room_id: parseInt(roomId!), folder_name: name }) }
+    ).then((response) => {
+      if (response.ok){
+        return response.json(); // Parse JSON if response is OK
+      } else {
+        throw new Error("Response was not okay when creating a folder, status:" + response.status + " " + response.statusText)
+      }
+    })
+    .then((data) => {
+      setRefreshToggle(x => !x);
+    })
+    .catch((err) => {
+      console.error("API error:", error);
+      updateError(err)
+    });
+
+    } catch (err) {
+      console.error('Error creating folder:', err);
+      updateError(String(err));
     }
   };
 
@@ -147,36 +229,34 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
     <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex justify-center p-4">
       <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-2xl">
         {/* <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Folders in Room</h2> */}
-        {isLoading ? (
-          <p className="text-center text-gray-600">Loading folders...</p>
+        {isLoadingFolders || isLoadingRoomDetails ? (
+          <LoadingScreen msg={'Loading Folders...'} />
         ) : error ? (
           <p className="text-center text-red-600">{error}</p>
         ) : folders.length === 0 ? (
+          <>
+          <div className="flex items-center justify-between mb-4">
+          <Breadcrumb room={{id:roomId!, name:roomName!}}/>
+          <UserMenu initials="SA" onLogout={() => logout(navigate, setLoggedOut)} />
+          </div>
           <div className="text-center py-8">
             <p className="text-5xl mb-4">🙁</p>
             <p className="text-lg italic text-gray-700 shadow-sm">No Folders Available</p>
             <p className="text-sm text-gray-600 mt-2">Create a new folder to get started!</p>
           </div>
+          </>
         ) : (
           <>
           <div className="flex items-center justify-between mb-4">
-          <Breadcrumb room={{id:roomId!, name:"holder"}}/>
+          <Breadcrumb room={{id:roomId!, name:roomName!}}/>
           <UserMenu initials="SA" onLogout={() => logout(navigate, setLoggedOut)} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* {folders.map((folder) => (
-              <div
-                key={folder.id}
-                className="bg-yellow-50 p-4 rounded-md border border-gray-200 shadow-sm cursor-pointer hover:bg-yellow-200"
-                // TODO: Navigate to notes in folder
-              >
-                <h3 className="text-md font-medium text-gray-800">{folder.name}</h3>
-              </div>
-            ))} */}
             {folders.map((folder) => (
             <div
               key={folder.id}
               className="flex items-center space-x-3 p-4 bg-yellow-200 border border-yellow-300 rounded-lg shadow-sm cursor-pointer hover:bg-yellow-300 transition"
+              onClick={() => navigate(`/notes/folder_id=${folder.id}`)}
             >
               <div className="text-yellow-700 text-2xl">📁</div>
               <div className="text-gray-800 font-semibold">{folder.name}</div>

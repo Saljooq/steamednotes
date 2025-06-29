@@ -147,7 +147,7 @@ const RoomsScreen: React.FC<RoomScreenProp> = ({setLoggedOut}) => {
       fetch('/api/rooms/create', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomname: name }) }
+        body: JSON.stringify({ room_name: name }) }
       ).then((res) => {
         if (!res.ok){
           throw new Error("Error when calling create room")
