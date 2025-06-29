@@ -20,17 +20,24 @@ The project is to enable better note taking
 
 ## Roadmap
 - [ ] Add option to delete note
-- [ ] Add logout mechanism
+- [x] Add logout mechanism
 - [ ] Add rooms/boxes/tables for the notes i.e. I can look at different area of notes
-- [ ] Add mechanism to create account
+- [x] Add mechanism to create account
 - [ ] Add rate limiting
-- [ ] Add postgres db
-- [ ] Add ORM - probably sqlc
-- [ ] Add migration version tool - likely flyway
-- [ ] Confirm notes persist beyond session
-- [ ] Enable https with let's encrypt
+- [x] Add postgres db
+- [x] Add ORM - probably sqlc
+- [x] Add migration version tool - likely flyway
+- [x] Confirm notes persist beyond session
+- [x] Enable https with let's encrypt
 - [ ] Add more detailed notes on architecture
 - [ ] Add caching layer (redis) - Long long term
+- [ ] Add shared notes
+- [ ] Added collaborative (possible realtime) support - https://github.com/yjs/yjs
+- [x] Add websocket support
+- [ ] Add chat
+- [ ] Look into Google Drive integration to store assets for attachments
+- [ ] Create backup mechanism (maybe)
+- [ ] Add Email confirmation mechanism
 
 ## Contributing
 #TODO
