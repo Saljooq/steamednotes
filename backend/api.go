@@ -108,7 +108,7 @@ func createUser(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateRoomRequest struct {
-	RoomName string `json:"roomname"`
+	RoomName string `json:"room_name"`
 }
 
 func (conn ConnectionData) createRoom(w http.ResponseWriter, r *http.Request) {
@@ -134,6 +134,7 @@ func (conn ConnectionData) createRoom(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Invalid request, perhaps name already used", http.StatusConflict)
 		fmt.Printf("Error in creating a room: %s", err.Error())
+		return
 	} else {
 		w.WriteHeader(http.StatusCreated)
 	}
@@ -163,8 +164,130 @@ func (conn ConnectionData) getRooms(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func createFolder(w http.ResponseWriter, r *http.Request) {}
-func getFolder(w http.ResponseWriter, r *http.Request)    {}
+type CreateFolderRequest struct {
+	RoomId int32  `json:"room_id"`
+	Name   string `json:"folder_name"`
+}
+
+func (conn ConnectionData) createFolder(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Header.Get("id")
+
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
+	}
+
+	var folder CreateFolderRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&folder); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		println(err.Error())
+		return
+	}
+
+	room, err := conn.queries.FindRoomById(r.Context(), folder.RoomId)
+
+	if err != nil {
+		http.Error(w, "Error getting room details", http.StatusBadRequest)
+		return
+	}
+
+	res, err := conn.queries.CreateFolder(r.Context(),
+		db.CreateFolderParams{
+			RoomID:   folder.RoomId,
+			UserID:   int32(iuserID),
+			Name:     folder.Name,
+			RoomName: room.Name})
+
+	if err != nil {
+		http.Error(w, "Error in creating a new folder", http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(res)
+}
+
+func (conn ConnectionData) getFoldersByRoom(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Header.Get("id")
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
+	}
+
+	// Get room_id from query parameter
+	roomIDStr := r.URL.Query().Get("room_id")
+	if roomIDStr == "" {
+		http.Error(w, "Missing room_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Convert room_id to integer
+	roomID, err := strconv.Atoi(roomIDStr)
+	if err != nil {
+		http.Error(w, "Invalid room_id", http.StatusBadRequest)
+		return
+	}
+
+	res, err := conn.queries.FindFoldersByRoom(r.Context(),
+		db.FindFoldersByRoomParams{RoomID: int32(roomID), UserID: int32(iuserID)})
+
+	if err != nil {
+		http.Error(w, "Error in getting folders by room", http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(res)
+}
+
+type RoomDetailsRes struct {
+	RoomName string `json:"room_name"`
+}
+
+func (conn ConnectionData) getRoomDetails(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Header.Get("id")
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
+	}
+
+	// Get room_id from query parameter
+	roomIDStr := r.URL.Query().Get("room_id")
+	if roomIDStr == "" {
+		http.Error(w, "Missing room_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Convert room_id to integer
+	roomID, err := strconv.Atoi(roomIDStr)
+	if err != nil {
+		http.Error(w, "Invalid room_id", http.StatusBadRequest)
+		return
+	}
+
+	room, err := conn.queries.FindRoomById(r.Context(), int32(roomID))
+
+	if err != nil {
+		http.Error(w, "Error finding room by id", http.StatusBadRequest)
+		return
+	}
+
+	if room.UserID != int32(iuserID) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	json.NewEncoder(w).Encode(RoomDetailsRes{RoomName: room.Name})
+}
+
 func (conn ConnectionData) logout(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{

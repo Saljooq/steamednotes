@@ -109,13 +109,16 @@ func main() {
 	http.HandleFunc("GET /api/users/create", createUser)
 	http.HandleFunc("POST /api/rooms/create", authMiddleware(conData.createRoom))
 	http.HandleFunc("GET /api/rooms/get", authMiddleware(conData.getRooms))
-	http.HandleFunc("POST /api/folders/create", authMiddleware(createFolder))
-	http.HandleFunc("GET /api/folders/get", authMiddleware(getFolder))
+	http.HandleFunc("GET /api/rooms/getdetails", authMiddleware(conData.getRoomDetails))
+	http.HandleFunc("POST /api/folders/create", authMiddleware(conData.createFolder))
+	http.HandleFunc("GET /api/folders/get", authMiddleware(conData.getFoldersByRoom))
 
 	http.HandleFunc("GET /api/users/issignedin", authMiddleware(isSignedIn))
 
 	http.HandleFunc("POST /api/logout", authMiddleware(conData.logout))
 	// await fetch('/api/logout', { method: 'POST', credentials: 'include' })
+
+	http.HandleFunc("GET /api/export", exportHandler)
 
 	http.HandleFunc("/api/ws", authMiddleware(handleWebSocket))
 
