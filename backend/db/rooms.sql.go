@@ -26,6 +26,22 @@ func (q *Queries) CreateRoom(ctx context.Context, arg CreateRoomParams) error {
 	return err
 }
 
+const findRoomById = `-- name: FindRoomById :one
+SELECT id, name, user_id, created_at FROM rooms where id=$1
+`
+
+func (q *Queries) FindRoomById(ctx context.Context, id int32) (Room, error) {
+	row := q.db.QueryRow(ctx, findRoomById, id)
+	var i Room
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.UserID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const findRoomsByUser = `-- name: FindRoomsByUser :many
 SELECT id, name, created_at FROM rooms 
 where user_id=$1

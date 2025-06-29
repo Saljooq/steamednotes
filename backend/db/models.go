@@ -14,16 +14,19 @@ type Folder struct {
 	UserID    int32
 	Name      string
 	CreatedAt pgtype.Timestamp
+	RoomName  string
 }
 
 type Note struct {
-	ID        int32
-	RoomID    int32
-	FolderID  int32
-	UserID    int32
-	Title     string
-	Content   string
-	CreatedAt pgtype.Timestamp
+	ID         int32
+	RoomID     int32
+	FolderID   int32
+	UserID     int32
+	Title      string
+	Content    string
+	CreatedAt  pgtype.Timestamp
+	RoomName   string
+	FolderName string
 }
 
 type Room struct {
