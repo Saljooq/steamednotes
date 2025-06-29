@@ -123,7 +123,7 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
       navigate('/rooms');
       return;
     }
-    let mounted = true;
+    // let mounted = true;
     setIsLoadingFolders(true);
     setIsLoadingRoomDetails(true);
     setError('');
@@ -177,7 +177,6 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
       updateError(err)
     });
 
-    return () => { mounted = false; };
   }, [roomId, refreshToggle]);
 
   function updateError(err: string){
@@ -210,7 +209,7 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
         throw new Error("Response was not okay when creating a folder, status:" + response.status + " " + response.statusText)
       }
     })
-    .then((data) => {
+    .then((_) => {
       setRefreshToggle(x => !x);
     })
     .catch((err) => {
@@ -256,7 +255,7 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
             <div
               key={folder.id}
               className="flex items-center space-x-3 p-4 bg-yellow-200 border border-yellow-300 rounded-lg shadow-sm cursor-pointer hover:bg-yellow-300 transition"
-              onClick={() => navigate(`/notes/folder_id=${folder.id}`)}
+              onClick={() => navigate(`/folder/${folder.id}`)}
             >
               <div className="text-yellow-700 text-2xl">📁</div>
               <div className="text-gray-800 font-semibold">{folder.name}</div>
