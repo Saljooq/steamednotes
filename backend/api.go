@@ -11,50 +11,209 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Get all notes for signed-in user
-func getNotes(w http.ResponseWriter, r *http.Request) {
-	username := r.Header.Get("Username")
-	notesM.Lock()
-	defer notesM.Unlock()
-	var userNotes []Note
-	for _, note := range notes {
-		if note.Owner == username {
-			userNotes = append(userNotes, note)
-		}
+func (conn ConnectionData) getNote(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("id")
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
 	}
-	json.NewEncoder(w).Encode(userNotes)
+
+	// Get room_id from query parameter
+	noteIDStr := r.URL.Query().Get("note_id")
+	if noteIDStr == "" {
+		http.Error(w, "Missing note_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Convert room_id to integer
+	noteID, err := strconv.Atoi(noteIDStr)
+	if err != nil {
+		http.Error(w, "Invalid note_id", http.StatusBadRequest)
+		return
+	}
+
+	note, err := conn.queries.FindNotesById(r.Context(), int32(noteID))
+
+	if note.UserID != int32(iuserID) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	if err != nil {
+		http.Error(w, "Error in getting note by id", http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(note)
+}
+
+type UpdateNoteRequest struct {
+	Title   string `json:"title"`
+	Content string `json:"content"`
+	ID      int32  `json:"id"`
+}
+
+func (conn ConnectionData) updateNote(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("id")
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
+	}
+
+	var noteUpdate UpdateNoteRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&noteUpdate); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		println(err.Error())
+		return
+	}
+
+	err = conn.queries.UpdateNoteNameAndContent(r.Context(), db.UpdateNoteNameAndContentParams{
+		Title:   noteUpdate.Title,
+		Content: noteUpdate.Content,
+		ID:      noteUpdate.ID,
+		UserID:  int32(iuserID),
+	})
+
+	if err != nil {
+		http.Error(w, "Something went wrong, unable to update note", http.StatusBadRequest)
+	}
+
 }
 
 // Get all notes for signed-in user
-func health(w http.ResponseWriter, r *http.Request) {
-	username := r.Header.Get("Username")
-	notesM.Lock()
-	defer notesM.Unlock()
-	var userNotes []Note
-	for _, note := range notes {
-		if note.Owner == username {
-			userNotes = append(userNotes, note)
-		}
+func (conn ConnectionData) getNotes(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("id")
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
 	}
-	json.NewEncoder(w).Encode(userNotes)
+
+	// Get room_id from query parameter
+	folderIDStr := r.URL.Query().Get("folder_id")
+	if folderIDStr == "" {
+		http.Error(w, "Missing folder_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Convert room_id to integer
+	folderID, err := strconv.Atoi(folderIDStr)
+	if err != nil {
+		http.Error(w, "Invalid folder_id", http.StatusBadRequest)
+		return
+	}
+
+	res, err := conn.queries.FindNotesByFolder(r.Context(),
+		db.FindNotesByFolderParams{FolderID: int32(folderID), UserID: int32(iuserID)})
+
+	if err != nil {
+		http.Error(w, "Error in getting folders by room", http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(res)
+}
+
+func (conn ConnectionData) getFolderDetails(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Header.Get("id")
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
+	}
+
+	// Get room_id from query parameter
+	folderIDStr := r.URL.Query().Get("folder_id")
+	if folderIDStr == "" {
+		http.Error(w, "Missing folder_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Convert room_id to integer
+	folderID, err := strconv.Atoi(folderIDStr)
+	if err != nil {
+		http.Error(w, "Invalid folder_id", http.StatusBadRequest)
+		return
+	}
+
+	folder, err := conn.queries.FindFolderById(r.Context(), int32(folderID))
+
+	if err != nil {
+		http.Error(w, "Error finding folder by id", http.StatusBadRequest)
+		return
+	}
+
+	if folder.UserID != int32(iuserID) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	json.NewEncoder(w).Encode(folder)
+}
+
+type CreateNoteRequest struct {
+	Name     string `json:"note_name"`
+	FolderId int32  `json:"folder_id"`
 }
 
 // Create a note
-func createNote(w http.ResponseWriter, r *http.Request) {
-	username := r.Header.Get("Username")
-	var note Note
-	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+func (conn ConnectionData) createNote(w http.ResponseWriter, r *http.Request) {
+
+	userID := r.Header.Get("id")
+
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
 		return
 	}
-	notesM.Lock()
-	defer notesM.Unlock()
-	note.ID = nextID
-	note.Owner = username
-	nextID++
-	notes = append(notes, note)
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(note)
+
+	var note CreateNoteRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&note); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		println(err.Error())
+		return
+	}
+
+	folder, err := conn.queries.FindFolderById(r.Context(), note.FolderId)
+
+	if err != nil {
+		http.Error(w, "Error getting room details", http.StatusBadRequest)
+		return
+	}
+
+	if folder.UserID != int32(iuserID) {
+		http.Error(w, "Unauthorized request - no write access to folder", http.StatusForbidden)
+		return
+	}
+
+	res, err := conn.queries.CreateNote(r.Context(),
+		db.CreateNoteParams{
+			RoomID:     folder.RoomID,
+			UserID:     int32(iuserID),
+			Title:      note.Name,
+			Content:    "",
+			FolderName: folder.Name,
+			RoomName:   folder.RoomName,
+			FolderID:   folder.ID,
+		})
+
+	if err != nil {
+		http.Error(w, "Error in creating a new folder", http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(res)
+
 }
 
 // Sign in

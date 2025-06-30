@@ -102,8 +102,10 @@ func main() {
 		json.NewEncoder(w).Encode(user)
 	})
 
-	http.HandleFunc("GET /api/notes", authMiddleware(getNotes))
-	http.HandleFunc("POST /api/notes/create", authMiddleware(createNote))
+	http.HandleFunc("GET /api/notes", authMiddleware(conData.getNotes))
+	http.HandleFunc("GET /api/notes/getnote", authMiddleware(conData.getNote))
+	http.HandleFunc("POST /api/notes/create", authMiddleware(conData.createNote))
+	http.HandleFunc("PATCH /api/note/update", authMiddleware(conData.updateNote))
 	http.HandleFunc("POST /api/signin", conData.signIn)
 
 	http.HandleFunc("GET /api/users/create", createUser)
@@ -112,11 +114,11 @@ func main() {
 	http.HandleFunc("GET /api/rooms/getdetails", authMiddleware(conData.getRoomDetails))
 	http.HandleFunc("POST /api/folders/create", authMiddleware(conData.createFolder))
 	http.HandleFunc("GET /api/folders/get", authMiddleware(conData.getFoldersByRoom))
+	http.HandleFunc("GET /api/folders/getdetails", authMiddleware(conData.getFolderDetails))
 
 	http.HandleFunc("GET /api/users/issignedin", authMiddleware(isSignedIn))
 
 	http.HandleFunc("POST /api/logout", authMiddleware(conData.logout))
-	// await fetch('/api/logout', { method: 'POST', credentials: 'include' })
 
 	http.HandleFunc("GET /api/export", exportHandler)
 
