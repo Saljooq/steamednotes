@@ -26,10 +26,10 @@ const Breadcrumb: React.FC<{
 
     if (folder != null) {
 
-      parts.push({label:folder.name, path:`/rooms/${room.id}/folders/${folder.id}`})
+      parts.push({label:folder.name, path:`/folder/${folder.id}`})
 
       if (note != null) {
-        parts.push({label:note.name, path:`/rooms/${room.id}/folders/${folder.id}/notes/${note.id}`})
+        parts.push({label:note.name, path:`/note/${note.id}`})
       }
 
     }
