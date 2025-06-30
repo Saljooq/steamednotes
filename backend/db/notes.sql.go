@@ -11,34 +11,38 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createNotes = `-- name: CreateNotes :one
-INSERT INTO notes (room_id, folder_id, user_id, title, content)
-VALUES ($1, $2, $3, $4, $5)
+const createNote = `-- name: CreateNote :one
+INSERT INTO notes (room_id, room_name, folder_id, folder_name, user_id, title, content)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id, created_at
 `
 
-type CreateNotesParams struct {
-	RoomID   int32
-	FolderID int32
-	UserID   int32
-	Title    string
-	Content  string
+type CreateNoteParams struct {
+	RoomID     int32
+	RoomName   string
+	FolderID   int32
+	FolderName string
+	UserID     int32
+	Title      string
+	Content    string
 }
 
-type CreateNotesRow struct {
+type CreateNoteRow struct {
 	ID        int32
 	CreatedAt pgtype.Timestamp
 }
 
-func (q *Queries) CreateNotes(ctx context.Context, arg CreateNotesParams) (CreateNotesRow, error) {
-	row := q.db.QueryRow(ctx, createNotes,
+func (q *Queries) CreateNote(ctx context.Context, arg CreateNoteParams) (CreateNoteRow, error) {
+	row := q.db.QueryRow(ctx, createNote,
 		arg.RoomID,
+		arg.RoomName,
 		arg.FolderID,
+		arg.FolderName,
 		arg.UserID,
 		arg.Title,
 		arg.Content,
 	)
-	var i CreateNotesRow
+	var i CreateNoteRow
 	err := row.Scan(&i.ID, &i.CreatedAt)
 	return i, err
 }
@@ -80,19 +84,45 @@ func (q *Queries) FindNotesByFolder(ctx context.Context, arg FindNotesByFolderPa
 }
 
 const findNotesById = `-- name: FindNotesById :one
-SELECT id, room_id, user_id, name, created_at, room_name FROM folders where id=$1
+SELECT id, room_id, folder_id, user_id, title, content, created_at, room_name, folder_name FROM notes where id=$1
 `
 
-func (q *Queries) FindNotesById(ctx context.Context, id int32) (Folder, error) {
+func (q *Queries) FindNotesById(ctx context.Context, id int32) (Note, error) {
 	row := q.db.QueryRow(ctx, findNotesById, id)
-	var i Folder
+	var i Note
 	err := row.Scan(
 		&i.ID,
 		&i.RoomID,
+		&i.FolderID,
 		&i.UserID,
-		&i.Name,
+		&i.Title,
+		&i.Content,
 		&i.CreatedAt,
 		&i.RoomName,
+		&i.FolderName,
 	)
 	return i, err
+}
+
+const updateNoteNameAndContent = `-- name: UpdateNoteNameAndContent :exec
+UPDATE notes
+SET title = $1, content = $2
+WHERE id = $3 AND user_id = $4
+`
+
+type UpdateNoteNameAndContentParams struct {
+	Title   string
+	Content string
+	ID      int32
+	UserID  int32
+}
+
+func (q *Queries) UpdateNoteNameAndContent(ctx context.Context, arg UpdateNoteNameAndContentParams) error {
+	_, err := q.db.Exec(ctx, updateNoteNameAndContent,
+		arg.Title,
+		arg.Content,
+		arg.ID,
+		arg.UserID,
+	)
+	return err
 }
