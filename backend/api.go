@@ -85,6 +85,41 @@ func (conn ConnectionData) updateNote(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (conn ConnectionData) deleteNote(w http.ResponseWriter, r *http.Request) {
+	userID := r.Header.Get("id")
+	iuserID, err := strconv.Atoi(userID)
+
+	if err != nil {
+		http.Error(w, "User validation error, user id is not the right format", http.StatusBadRequest)
+		return
+	}
+
+	// Get room_id from query parameter
+	noteIDStr := r.URL.Query().Get("note_id")
+	if noteIDStr == "" {
+		http.Error(w, "Missing note_id parameter", http.StatusBadRequest)
+		return
+	}
+
+	// Convert room_id to integer
+	noteID, err := strconv.Atoi(noteIDStr)
+	if err != nil {
+		http.Error(w, "Invalid note_id", http.StatusBadRequest)
+		return
+	}
+
+	err = conn.queries.DeleteNote(r.Context(), db.DeleteNoteParams{
+		ID:     int32(noteID),
+		UserID: int32(iuserID),
+	})
+
+	if err != nil {
+		http.Error(w, "Error deleting note", http.StatusBadRequest)
+		return
+	}
+
+}
+
 // Get all notes for signed-in user
 func (conn ConnectionData) getNotes(w http.ResponseWriter, r *http.Request) {
 	userID := r.Header.Get("id")
