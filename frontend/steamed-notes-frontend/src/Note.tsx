@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Breadcrumb from "./Breadcrumbs";
 import UserMenu from "./UserMenu";
@@ -49,6 +49,7 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
   const [unsavedContent, setUnsavedContent] = useState<string>("");
   const [unsavedName, setUnsavedName] = useState<string>("");
   const navigate = useNavigate();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!noteId) {
@@ -99,6 +100,7 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
     };
   }, [noteId, navigate]);
 
+
   const handleContentChange = (content: string) => {
     setUnsavedContent(content);
   };
@@ -117,7 +119,7 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
         body: JSON.stringify({
           id: parseInt(noteId!),
           content: unsavedContent,
-          title: note.name,
+          title: unsavedName,
         }),
         credentials: "include",
       });
@@ -134,6 +136,27 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
       setIsSaving(false);
     }
   };
+
+  useEffect(() => { // + Added for auto-resize
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset height
+      textarea.style.height = `${textarea.scrollHeight + 50}px`; // Set to content height
+    }
+  }, [unsavedContent]); // + Trigger on content change
+
+    useEffect(() => { // + Added for Ctrl + S
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === 's') {
+        event.preventDefault();
+        handleSave();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown as any);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown as any);
+    };
+  }, [handleSave]);
 
   return (
     <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex justify-center p-4">
@@ -166,7 +189,8 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
             <textarea
               value={unsavedContent}
               onChange={(e) => handleContentChange(e.target.value)}
-              className="w-full h-96 p-4 bg-yellow-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-gray-800"
+              className="w-full min-h-90 p-4 bg-yellow-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-gray-800 resize-none"
+              ref={textareaRef}
               placeholder="Write your note here..."
             />
             <div className="flex justify-end mt-4 space-x-2">
