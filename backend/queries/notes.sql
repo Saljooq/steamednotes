@@ -14,3 +14,7 @@ SELECT * FROM notes where id=$1;
 UPDATE notes
 SET title = $1, content = $2
 WHERE id = $3 AND user_id = $4;
+
+-- name: DeleteNote :exec
+DELETE FROM notes 
+WHERE id=$1 AND user_id=$2;

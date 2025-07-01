@@ -106,6 +106,7 @@ func main() {
 	http.HandleFunc("GET /api/notes/getnote", authMiddleware(conData.getNote))
 	http.HandleFunc("POST /api/notes/create", authMiddleware(conData.createNote))
 	http.HandleFunc("PATCH /api/note/update", authMiddleware(conData.updateNote))
+	http.HandleFunc("DELETE /api/note/delete", authMiddleware(conData.deleteNote))
 	http.HandleFunc("POST /api/signin", conData.signIn)
 
 	http.HandleFunc("GET /api/users/create", createUser)
