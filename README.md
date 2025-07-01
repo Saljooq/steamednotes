@@ -38,6 +38,7 @@ The project is to enable better note taking
 - [ ] Look into Google Drive integration to store assets for attachments
 - [ ] Create backup mechanism (maybe)
 - [ ] Add Email confirmation mechanism
+- [ ] Add index to speed up lookup
 
 ## Contributing
 #TODO
