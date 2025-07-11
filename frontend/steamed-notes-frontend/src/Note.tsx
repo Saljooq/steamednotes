@@ -57,11 +57,12 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [unsavedContent, setUnsavedContent] = useState<string>("");
   const [unsavedName, setUnsavedName] = useState<string>("");
-  const [showFolderView, setShowFolderView] = useState(false); // + Added for toggle
   const [folderNotes, setFolderNotes] = useState<FolderNote[]>([]); // + Added for folder notes
   const [isLoadingFolderNotes, setIsLoadingFolderNotes] = useState(false);
   const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const aspectRatio = window.innerHeight / window.innerWidth;
+  const [showFolderView, setShowFolderView] = useState(aspectRatio < 1); // + Added for toggle
 
   useEffect(() => {
     if (!noteId) {
@@ -165,7 +166,46 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
     }
   }, [unsavedContent]); // + Trigger on content change
 
-    useEffect(() => { // + Added for Ctrl + S
+  useEffect(() => { // + Added for Ctrl + Up or Ctrl + Down
+    const handleNoteChange = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === "ArrowDown") {
+        event.preventDefault();
+
+        var noteIdx: number | null = null;
+        for (let i = 0; i < folderNotes.length; i++){
+          if (noteId! == folderNotes[i].id){
+            noteIdx = i;
+            break;
+          }
+        }
+        navigate(`/note/${folderNotes[(noteIdx! + 1) % folderNotes.length].id}`)
+      }  
+      
+      if (event.ctrlKey && event.key === "ArrowUp") {
+        event.preventDefault();
+        var noteIdx: number | null = null;
+        for (let i = 0; i < folderNotes.length; i++){
+          if (noteId! == folderNotes[i].id){
+            noteIdx = i;
+            break;
+          }
+        }
+
+        if ( noteIdx! > 0){
+          navigate(`/note/${folderNotes[noteIdx! - 1].id}`)
+        } else {
+          navigate(`/note/${folderNotes[noteIdx! - 1 + folderNotes.length].id}`)
+        }
+      }
+    };
+    document.addEventListener('keydown', handleNoteChange as any);
+    return () => {
+      document.removeEventListener('keydown', handleNoteChange as any);
+    };
+  }, [folderNotes]);
+
+
+  useEffect(() => { // + Added for Ctrl + S
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.ctrlKey && event.key === 's') {
         event.preventDefault();
