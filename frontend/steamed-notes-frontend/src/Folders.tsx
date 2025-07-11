@@ -226,7 +226,7 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
 
   return (
     <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex justify-center p-4">
-      <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-2xl">
+      <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-4xl">
         {/* <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Folders in Room</h2> */}
         {isLoadingFolders || isLoadingRoomDetails ? (
           <LoadingScreen msg={'Loading Folders...'} />

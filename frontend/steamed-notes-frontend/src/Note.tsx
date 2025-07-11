@@ -34,6 +34,15 @@ function transformFromApiToNote(input: NoteAPIInterface): Note {
   } as Note;
 }
 
+interface FolderNote { // + Added for folder notes
+  id: string;
+  name: string;
+}
+
+function transformFromApiToFolderNote(input: { ID: string; Title: string; CreatedAt: number }): FolderNote {
+  return { id: input.ID, name: input.Title } as FolderNote;
+}
+
 interface NoteScreenProp {
   setLoggedOut: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -48,6 +57,9 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [unsavedContent, setUnsavedContent] = useState<string>("");
   const [unsavedName, setUnsavedName] = useState<string>("");
+  const [showFolderView, setShowFolderView] = useState(false); // + Added for toggle
+  const [folderNotes, setFolderNotes] = useState<FolderNote[]>([]); // + Added for folder notes
+  const [isLoadingFolderNotes, setIsLoadingFolderNotes] = useState(false);
   const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -75,6 +87,14 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
           setNote(transformFromApiToNote(data));
           setUnsavedContent(data.Content);
           setUnsavedName(data.Title);
+          // + Update folder notes if already shown
+          if (showFolderView) {
+            setFolderNotes((prev) =>
+              prev.map((n) =>
+                n.id === data.ID ? { ...n, name: data.Title } : n
+              )
+            );
+          }
           setRoomName(data.RoomName);
           setFolderName(data.FolderName);
           setIsLoading(false);
@@ -158,9 +178,75 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
     };
   }, [handleSave]);
 
+
+  useEffect(() => { // + Added to fetch folder notes
+    if (!showFolderView || !note?.folderId) return;
+    setIsLoadingFolderNotes(true);
+    fetch(`/api/notes?folder_id=${note.folderId}`, {
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+    })
+      .then((response) => {
+        if (response.ok) return response.json();
+        throw new Error(`Response was not okay, status: ${response.status} ${response.statusText}`);
+      })
+      .then((data) => {
+        const notesData: { ID: string; Title: string; CreatedAt: number }[] = data;
+        setFolderNotes(notesData.map(transformFromApiToFolderNote));
+        setIsLoadingFolderNotes(false);
+      })
+      .catch((err) => {
+        console.error('Fetch error:', err);
+        setError(String(err));
+        setIsLoadingFolderNotes(false);
+      });
+
+    // setFolderNotes([{ID: "1", Name: "note", CreatedAt: 1}].map(transformFromApiToFolderNote));
+    // setIsLoadingFolderNotes(false);
+  }, [showFolderView, note?.folderId]);
+
+
+  const handleSelectNote = (noteId: string) => { // + Added to switch notes
+    if (noteId !== note?.id) {
+      navigate(`/note/${noteId}`);
+    }
+  };
+
+  const toggleFolderView = () => { // + Added to toggle folder view
+    setShowFolderView(!showFolderView);
+    setError('');
+  };
+
   return (
     <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex justify-center p-4">
-      <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-2xl">
+      <div className="relative min-h-screen w-full flex justify-center">
+      <div className="bg-yellow-100 p-4 rounded-lg shadow-lg w-full max-w-4xl">
+        {showFolderView && ( // + Added left panel
+          <div className={`fixed top-0 left-0 h-full w-64 bg-yellow-100 p-4 shadow-lg transform ${showFolderView ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out z-10 overflow-y-auto`}>
+            <h2 className="text-lg font-bold text-gray-800 mb-4">Notes in Folder</h2>
+            {isLoadingFolderNotes ? (
+              <LoadingScreen msg="Loading Notes..." />
+            ) : error && showFolderView ? (
+              <p className="text-center text-red-600">{error}</p>
+            ) : folderNotes.length === 0 ? (
+              <p className="text-center text-gray-600">No Notes Available</p>
+            ) : (
+              <div className="space-y-2">
+                {folderNotes.map((folderNote) => (
+                  <div
+                    key={folderNote.id}
+                    className={`flex items-center space-x-3 p-2 bg-yellow-200 border border-yellow-300 rounded-md cursor-pointer hover:bg-yellow-300 transition ${folderNote.id === note?.id ? 'bg-yellow-300' : ''}`}
+                    onClick={() => handleSelectNote(folderNote.id)}
+                  >
+                    <div className="text-yellow-700 text-xl">📝</div>
+                    <div className="text-gray-800 font-semibold">{folderNote.name}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+        <div className="w-full">
         {isLoading ? (
           <LoadingScreen msg="Loading Note..." />
         ) : error ? (
@@ -175,10 +261,19 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
                 folder={{ id: note.folderId, name: folderName }}
                 note={{ id: note.id, name: unsavedName }}
               />
+              <div className="flex items-center space-x-2 select-none">
+                  <div // + Added toggle button
+                    onClick={toggleFolderView}
+                      className="text-2xl text-yellow-700 hover:text-yellow-800 cursor-pointer"
+                      title={showFolderView ? 'Hide Folder View' : 'Show Folder View'}
+                  >
+                    {showFolderView ? '📂' : '📁'}
+                  </div>
               <UserMenu
                 initials="SA"
                 onLogout={() => logout(navigate, setLoggedOut)}
               />
+              </div>
             </div>
             <input
               value={unsavedName}
@@ -205,8 +300,11 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
                 {isSaving ? "Saving..." : "Save"}
               </button>
             </div>
+            
           </>
         )}
+        </div>
+        </div>
       </div>
     </div>
   );
