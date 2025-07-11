@@ -164,7 +164,7 @@ const RoomsScreen: React.FC<RoomScreenProp> = ({setLoggedOut}) => {
 
   return (
     <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex  justify-center p-4">
-      <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-2xl">
+      <div className="bg-yellow-100 p-8 rounded-lg shadow-lg w-full max-w-4xl">
         { isLoading ? <LoadingScreen msg="Loading rooms..."/> : ( <>
         <div className="flex items-center justify-between mb-4">
           <Breadcrumb />
