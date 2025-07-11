@@ -36,11 +36,11 @@ const Breadcrumb: React.FC<{
   }
 
   return (
-    <nav className="text-sm text-gray-600 flex space-x-1 p-2">
+    <nav className="text-sm text-gray-600 flex space-x-1 p-2 select-none">
       {parts.map((p, i) => (
         <span key={i} className="flex items-center space-x-1">
           <span
-            className="cursor-pointer hover:underline"
+            className="cursor-pointer hover:underline focus:outline-none"
             onClick={() => navigate(p.path)}
           >
             {p.label}
