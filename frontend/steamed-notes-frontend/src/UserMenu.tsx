@@ -19,7 +19,7 @@ const getInitials = (name: string): string => {
   return initials || "";
 };
 
-const UserMenu: React.FC<Props> = ({ initials = getInitials(localStorage.getItem("username")!), onLogout }) => {
+const UserMenu: React.FC<Props> = ({ initials = getInitials(localStorage.getItem("username") || "?"), onLogout }) => {
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
