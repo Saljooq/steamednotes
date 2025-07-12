@@ -9,6 +9,7 @@ import FoldersScreen from "./Folders";
 import WebSocketComponent from "./Messages";
 import NotesScreen from "./Notes";
 import NoteScreen from "./Note";
+import AdminPage from "./Admin";
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
         <Route path="/folder/:folderId" element={<NotesScreen setLoggedOut={setLoggedOut}/>} />
         <Route path="/note/:noteId" element={<NoteScreen setLoggedOut={setLoggedOut}/>} />
         <Route path="/messages" element={<WebSocketComponent/>} />
+        <Route path="/admin" element={<AdminPage/>} />
       </Routes>
     </BrowserRouter>
   )
