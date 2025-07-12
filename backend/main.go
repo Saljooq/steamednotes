@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sync"
 
 	"steamednotes/db" // Adjust based on your module path
 
@@ -33,15 +32,14 @@ type ConnectionData struct {
 	queries *db.Queries
 }
 
+// Connection For Admin
+type ConnectionDataAdmin struct {
+	queries *db.Queries
+	pool    *pgxpool.Pool
+}
+
 // In-memory store
 var (
-	// users = []User{
-	// 	{Username: "alice", Password: "pass123"},
-	// 	{Username: "bob", Password: "secret"},
-	// }
-	notes  []Note
-	notesM sync.Mutex // Thread-safe
-	nextID = 1
 	secret = []byte("super-secret-key")
 )
 
@@ -60,11 +58,9 @@ func main() {
 
 	defer conn.Close()
 
-	// HTTP server
-	// mux := http.NewServeMux()
-
 	queries := db.New(conn)
 	conData := ConnectionData{queries: queries}
+	conAdminData := ConnectionDataAdmin{queries: queries, pool: conn}
 
 	// List users handler
 	http.HandleFunc("GET /api/users", func(w http.ResponseWriter, r *http.Request) {
@@ -124,6 +120,8 @@ func main() {
 	http.HandleFunc("GET /api/export", exportHandler)
 
 	http.HandleFunc("/api/ws", authMiddleware(handleWebSocket))
+
+	http.HandleFunc("POST /api/admin", authMiddleware(conAdminData.adminQuery))
 
 	fmt.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", nil)
