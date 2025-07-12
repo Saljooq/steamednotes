@@ -310,7 +310,6 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
                     {showFolderView ? '📂' : '📁'}
                   </div>
               <UserMenu
-                initials="SA"
                 onLogout={() => logout(navigate, setLoggedOut)}
               />
               </div>

@@ -236,7 +236,7 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
           <>
           <div className="flex items-center justify-between mb-4">
           <Breadcrumb room={{id:roomId!, name:roomName!}}/>
-          <UserMenu initials="SA" onLogout={() => logout(navigate, setLoggedOut)} />
+          <UserMenu onLogout={() => logout(navigate, setLoggedOut)} />
           </div>
           <div className="text-center py-8">
             <p className="text-5xl mb-4">🙁</p>
@@ -248,7 +248,7 @@ const FoldersScreen: React.FC<FolderScreenProp> = ({setLoggedOut}) => {
           <>
           <div className="flex items-center justify-between mb-4">
           <Breadcrumb room={{id:roomId!, name:roomName!}}/>
-          <UserMenu initials="SA" onLogout={() => logout(navigate, setLoggedOut)} />
+          <UserMenu onLogout={() => logout(navigate, setLoggedOut)} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {folders.map((folder) => (

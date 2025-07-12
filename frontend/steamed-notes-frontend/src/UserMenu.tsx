@@ -5,7 +5,21 @@ type Props = {
   onLogout: () => void
 }
 
-const UserMenu: React.FC<Props> = ({ initials = 'SA', onLogout }) => {
+const getInitials = (name: string): string => {
+  // Remove extra spaces and split by spaces or special characters
+  const parts = name.trim().split(/[\s.@]+/).filter(part => part.length > 0);
+  
+  // Take first two parts, get first letter of each, and convert to uppercase
+  const initials = parts
+    .slice(0, 2)
+    .map(part => part.charAt(0).toUpperCase())
+    .join("");
+  
+  // Return at least one initial, or empty string if no valid parts
+  return initials || "";
+};
+
+const UserMenu: React.FC<Props> = ({ initials = getInitials(localStorage.getItem("username")!), onLogout }) => {
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 

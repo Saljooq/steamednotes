@@ -168,7 +168,7 @@ const RoomsScreen: React.FC<RoomScreenProp> = ({setLoggedOut}) => {
         { isLoading ? <LoadingScreen msg="Loading rooms..."/> : ( <>
         <div className="flex items-center justify-between mb-4">
           <Breadcrumb />
-          <UserMenu initials="SA" onLogout={() => logout(navigate, setLoggedOut)} />
+          <UserMenu onLogout={() => logout(navigate, setLoggedOut)} />
         </div>
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Your Rooms</h2>
         {rooms.length === 0 ? (

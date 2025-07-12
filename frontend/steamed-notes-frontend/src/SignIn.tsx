@@ -78,7 +78,8 @@ export function SignIn() {
           credentials: "include",
         });
         if (res.ok) {
-          // onSignIn(formData.email); // Pass username up
+          const resJson: {username: string} = await res.json();
+          localStorage.setItem("username", resJson.username);
           navigate("/rooms")
         } else {
           alert("Sign-in failed: " + (await res.text()));

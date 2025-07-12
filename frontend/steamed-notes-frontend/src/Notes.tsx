@@ -349,7 +349,6 @@ const NotesScreen: React.FC<NotesScreenProp> = ({ setLoggedOut }) => {
                 folder={{ id: folderId || "", name: folderName || "" }}
               />
               <UserMenu
-                initials="SA"
                 onLogout={() => logout(navigate, setLoggedOut)}
               />
             </div>
