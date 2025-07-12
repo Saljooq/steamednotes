@@ -8,6 +8,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AdminEmail struct {
+	Email string
+}
+
 type Folder struct {
 	ID        int32
 	RoomID    int32
