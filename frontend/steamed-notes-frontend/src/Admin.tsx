@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 interface QueryResult {
   columns: string[];
-  rows: any[][];
+  rows: any[][] | null;
   error?: string;
 }
 
@@ -81,7 +81,7 @@ const AdminPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {result.rows.map((row, rowIdx) => (
+                  {(result.rows || []).map((row, rowIdx) => (
                     <tr key={rowIdx} className="hover:bg-gray-50">
                       {row.map((cell, cellIdx) => (
                         <td key={cellIdx} className="border border-gray-300 p-2">
