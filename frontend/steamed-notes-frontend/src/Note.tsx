@@ -62,7 +62,8 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
   const navigate = useNavigate();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const aspectRatio = window.innerHeight / window.innerWidth;
-  const [showFolderView, setShowFolderView] = useState(aspectRatio < 1); // + Added for toggle
+  const isMobile = aspectRatio > 1.5;
+  const [showFolderView, setShowFolderView] = useState(!isMobile); // + Added for toggle
 
   useEffect(() => {
     if (!noteId) {
@@ -248,6 +249,9 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
 
   const handleSelectNote = (noteId: string) => { // + Added to switch notes
     if (noteId !== note?.id) {
+      if (isMobile){
+        setShowFolderView(false);
+      }
       navigate(`/note/${noteId}`);
     }
   };
