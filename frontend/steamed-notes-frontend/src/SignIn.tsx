@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import Footer from "./staticPages/Footer";
 
 interface FormData {
   email: string;
@@ -34,11 +35,12 @@ const Typewriter: React.FC<{ text: string; speed: number }> = ({ text, speed }) 
       </style>
       <div className="w-full max-w-md text-2xl font-mono text-gray-800 text-center mb-8 relative whitespace-nowrap overflow-hidden">
         {text.slice(0, index)}
-          <span className="inline-block w-0.5 h-6 bg-gray-800 animate-blink ml-1 align-middle" />
+        <span className="inline-block w-0.5 h-6 bg-gray-800 animate-blink ml-1 align-middle" />
       </div>
     </>
   );
 };
+
 export function SignIn() {
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -46,6 +48,7 @@ export function SignIn() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   let navigate = useNavigate();
 
   const validateForm = (): Partial<FormData> => {
@@ -78,9 +81,9 @@ export function SignIn() {
           credentials: "include",
         });
         if (res.ok) {
-          const resJson: {username: string} = await res.json();
+          const resJson: { username: string } = await res.json();
           localStorage.setItem("username", resJson.username);
-          navigate("/rooms")
+          navigate("/rooms");
         } else {
           alert("Sign-in failed: " + (await res.text()));
         }
@@ -99,6 +102,10 @@ export function SignIn() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible((prev) => !prev);
   };
 
   return (
@@ -137,15 +144,29 @@ export function SignIn() {
             >
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                type={isPasswordVisible ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md"
+                aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+              >
+                {isPasswordVisible ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">{errors.password}</p>
             )}
@@ -160,13 +181,15 @@ export function SignIn() {
         </form>
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <Link to="/signup"
+          <Link
+            to="/signup"
             className="font-medium text-indigo-600 hover:text-indigo-500"
           >
             Sign up
           </Link>
         </p>
+        <Footer />
       </div>
     </div>
   );
-};
+}

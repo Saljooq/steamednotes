@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import Footer from "./staticPages/Footer";
 
 interface FormData {
   name: string;
@@ -15,6 +17,7 @@ export default function SignupForm() {
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const navigate = useNavigate();
 
   const validateForm = (): Partial<FormData> => {
@@ -45,21 +48,24 @@ export default function SignupForm() {
         fetch('/api/adduser', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({username: formData.name, email: formData.email, passwordhash: formData.password
-        })}).then(
+          body: JSON.stringify({
+            username: formData.name,
+            email: formData.email,
+            passwordhash: formData.password
+          })
+        }).then(
           res => {
             // Reset form after successful submission
             setFormData({ name: "", email: "", password: "" });
             setIsSubmitting(false);
-            if (res.ok){
+            if (res.ok) {
               console.log("Form submitted:", formData);
-              navigate('/signin')
+              navigate('/signin');
             } else {
               setErrors({ email: "An error occurred during signup" });
             }
           }
         );
-        
       } catch (error) {
         setErrors({ email: "An error occurred during signup" });
       }
@@ -70,6 +76,10 @@ export default function SignupForm() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible((prev) => !prev);
   };
 
   return (
@@ -126,15 +136,29 @@ export default function SignupForm() {
             >
               Password
             </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                type={isPasswordVisible ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md"
+                aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+              >
+                {isPasswordVisible ? (
+                  <EyeSlashIcon className="h-5 w-5" />
+                ) : (
+                  <EyeIcon className="h-5 w-5" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="mt-1 text-sm text-red-600">{errors.password}</p>
             )}
@@ -153,6 +177,7 @@ export default function SignupForm() {
             Log in
           </Link>
         </p>
+        <Footer />
       </div>
     </div>
   );
