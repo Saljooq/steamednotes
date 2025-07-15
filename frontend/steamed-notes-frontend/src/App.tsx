@@ -10,6 +10,8 @@ import WebSocketComponent from "./Messages";
 import NotesScreen from "./Notes";
 import NoteScreen from "./Note";
 import AdminPage from "./Admin";
+import About from "./staticPages/About";
+import Shortcuts from "./staticPages/Shortcuts";
 
 
 function App() {
@@ -59,6 +61,8 @@ function App() {
         <Route path="/note/:noteId" element={<NoteScreen setLoggedOut={setLoggedOut}/>} />
         <Route path="/messages" element={<WebSocketComponent/>} />
         <Route path="/admin" element={<AdminPage/>} />
+        <Route path="/about" element={<About/>} />
+        <Route path="/shortcuts" element={<Shortcuts/>} />
       </Routes>
     </BrowserRouter>
   )
