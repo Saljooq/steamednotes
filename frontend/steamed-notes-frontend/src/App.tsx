@@ -12,6 +12,7 @@ import NoteScreen from "./Note";
 import AdminPage from "./Admin";
 import About from "./staticPages/About";
 import Shortcuts from "./staticPages/Shortcuts";
+import RequireAuth from "./RequireAuth";
 
 
 function App() {
@@ -48,21 +49,25 @@ function App() {
         <Route
           path="/signin"
           element={
-            hasCheckedSignIn ? ( signedIn ? <RoomsScreen setLoggedOut={setLoggedOut}/> : <SignIn /> ) 
+            hasCheckedSignIn ? <SignIn setHasSignIn={setSignedIn}/> 
             : <LoadingScreen msg="Loading your notes..." />
           }
         />
         <Route path="/signup" element={<SignupForm/>} />
         <Route path="terminal" element={<Terminal/>}/>
-        <Route path="/" element={<Navigate to="/signin" />} />
-        <Route path="/rooms" element={<RoomsScreen setLoggedOut={setLoggedOut} />} />
-        <Route path="/rooms/:roomId" element={<FoldersScreen setLoggedOut={setLoggedOut}/>} />
-        <Route path="/folder/:folderId" element={<NotesScreen setLoggedOut={setLoggedOut}/>} />
-        <Route path="/note/:noteId" element={<NoteScreen setLoggedOut={setLoggedOut}/>} />
+        <Route path="/" element={hasCheckedSignIn ? (signedIn ? <Navigate to="/rooms"/> : <Navigate to="/signin" />) : <LoadingScreen msg="Loading..." />} />
         <Route path="/messages" element={<WebSocketComponent/>} />
         <Route path="/admin" element={<AdminPage/>} />
         <Route path="/about" element={<About/>} />
         <Route path="/shortcuts" element={<Shortcuts/>} />
+
+
+        {/* PROTECTED PATHS BELOW */}
+        <Route path="/note/:noteId" element={<RequireAuth isSignedIn={signedIn} hasCheckedSignIn={hasCheckedSignIn}><NoteScreen setLoggedOut={setLoggedOut}/></RequireAuth>} />
+        <Route path="/rooms" element={<RequireAuth isSignedIn={signedIn} hasCheckedSignIn={hasCheckedSignIn}><RoomsScreen setLoggedOut={setLoggedOut} /></RequireAuth>} />
+        <Route path="/rooms/:roomId" element={<RequireAuth isSignedIn={signedIn} hasCheckedSignIn={hasCheckedSignIn}><FoldersScreen setLoggedOut={setLoggedOut}/></RequireAuth>} />
+        <Route path="/folder/:folderId" element={<RequireAuth isSignedIn={signedIn} hasCheckedSignIn={hasCheckedSignIn}><NotesScreen setLoggedOut={setLoggedOut}/></RequireAuth>} />
+
       </Routes>
     </BrowserRouter>
   )

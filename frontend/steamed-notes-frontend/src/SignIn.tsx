@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import Footer from "./staticPages/Footer";
 
@@ -19,6 +19,7 @@ const Typewriter: React.FC<{ text: string; speed: number }> = ({ text, speed }) 
       return () => clearTimeout(timer);
     }
   }, [index, text, speed]);
+
 
   return (
     <>
@@ -41,7 +42,11 @@ const Typewriter: React.FC<{ text: string; speed: number }> = ({ text, speed }) 
   );
 };
 
-export function SignIn() {
+interface SignInProp {
+  setHasSignIn: (hasSignedIn: boolean) => void;
+}
+
+export const SignIn: React.FC<SignInProp> = ({ setHasSignIn }) => {
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -50,6 +55,13 @@ export function SignIn() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   let navigate = useNavigate();
+  let location = useLocation();
+  let from = (location.state as { from?: Location })?.from?.pathname || "/rooms";
+
+  if (from === '/signin'){
+    from = "/rooms"
+  } 
+
 
   const validateForm = (): Partial<FormData> => {
     const newErrors: Partial<FormData> = {};
@@ -83,7 +95,8 @@ export function SignIn() {
         if (res.ok) {
           const resJson: { username: string } = await res.json();
           localStorage.setItem("username", resJson.username);
-          navigate("/rooms");
+          setHasSignIn(true);
+          navigate(from);
         } else {
           alert("Sign-in failed: " + (await res.text()));
         }
