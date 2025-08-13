@@ -1,9 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Breadcrumb from "./Breadcrumbs";
 import UserMenu from "./UserMenu";
 import { logout } from "./helper/Logout";
 import LoadingScreen from "./Loading";
+// import TreeViewPlugin from "./plugins/TreeViewPlugin";
+import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
+import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { $getRoot, EditorState } from "lexical";
+import { LoadPlainTextPlugin } from "./plugins/LoadPlainTextPlugin";
 
 interface Note {
   id: string;
@@ -60,7 +70,7 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
   const [folderNotes, setFolderNotes] = useState<FolderNote[]>([]); // + Added for folder notes
   const [isLoadingFolderNotes, setIsLoadingFolderNotes] = useState(false);
   const navigate = useNavigate();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // const textareaRef = useRef<HTMLTextAreaElement>(null);
   const aspectRatio = window.innerHeight / window.innerWidth;
   const isMobile = aspectRatio > 1.5;
   const [showFolderView, setShowFolderView] = useState(!isMobile); // + Added for toggle
@@ -159,13 +169,18 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
     }
   };
 
-  useEffect(() => { // + Added for auto-resize
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = 'auto'; // Reset height
-      textarea.style.height = `${textarea.scrollHeight + 50}px`; // Set to content height
-    }
-  }, [unsavedContent]); // + Trigger on content change
+  // useEffect(() => { // + Added for auto-resize
+    
+  //   console.log(`Change detected in unsaved content for note: ${noteId}`)
+
+  //   const textarea = textareaRef.current;
+  //   if (textarea) {
+  //     textarea.style.height = 'auto'; // Reset height
+  //     textarea.style.height = `${textarea.scrollHeight + 50}px`; // Set to content height
+  //     console.log(`Change detected updating : ${textarea.style.height} from scroll: ${textarea.scrollHeight}`)
+  //   }
+    
+  // }, [unsavedContent]); // + Trigger on content change
 
   useEffect(() => { // + Added for Ctrl + Up or Ctrl + Down
     const handleNoteChange = (event: KeyboardEvent) => {
@@ -261,6 +276,20 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
     setError('');
   };
 
+
+  const onChange = (editorState: EditorState) => {
+    editorState.read(() => {
+      const root = $getRoot();
+      const plainText = root.getTextContent();
+      // console.log('Plain text:', plainText);
+      handleContentChange(plainText)
+
+      // store json in localStorage or send to backend
+    });
+  };
+
+
+
   return (
     <div className="min-h-screen bg-yellow-50 bg-[repeating-linear-gradient(to_bottom,_transparent_0px,_transparent_24px,#e0e0e0_25px,#e0e0e0_26px)] flex justify-center p-4">
       <div className="relative min-h-screen w-full flex justify-center">
@@ -324,13 +353,30 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
               className="w-full p-2 mb-4 bg-yellow-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-xl text-gray-800"
               placeholder="Enter note name"
             />
-            <textarea
+            {/* <textarea
               value={unsavedContent}
               onChange={(e) => handleContentChange(e.target.value)}
               className="w-full min-h-90 p-4 bg-yellow-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-gray-800 resize-none"
               ref={textareaRef}
               placeholder="Write your note here..."
-            />
+            /> */}
+
+            <LexicalComposer initialConfig={editorConfig}>
+              <div className="editor-container">
+                <div className="editor-inner"     
+                >
+                  <PlainTextPlugin
+                    contentEditable={<ContentEditable className="editor-input" />}
+                    ErrorBoundary={LexicalErrorBoundary}
+                  />
+                  <LoadPlainTextPlugin initialText={unsavedContent} />
+                  <HistoryPlugin />
+                  <AutoFocusPlugin />
+                  <OnChangePlugin onChange={onChange} />
+                  {/* <TreeViewPlugin /> */}
+                </div>
+              </div>
+            </LexicalComposer>
             <div className="flex justify-end mt-4 space-x-2">
               <button
                 onClick={handleSave}
@@ -352,5 +398,30 @@ const NoteScreen: React.FC<NoteScreenProp> = ({ setLoggedOut }) => {
     </div>
   );
 };
+
+
+const theme = {
+  paragraph: 'mb-2', // Tailwind classes
+  text: {
+    bold: 'font-bold',
+    italic: 'italic',
+    underline: 'underline',
+  },
+  root: '"w-full min-h-90 p-4 bg-yellow-100 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 font-mono text-gray-800 resize-none',
+};
+
+const editorConfig = {
+  namespace: 'React.js Demo',
+  nodes: [],
+  // Handling of errors during update
+  onError(error: Error) {
+    throw error;
+  },
+  theme: theme
+};
+
+
+
+
 
 export default NoteScreen;
