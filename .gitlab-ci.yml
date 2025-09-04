@@ -164,7 +164,7 @@ certificates:
           -v ../certbot/certs:/etc/letsencrypt \
           -v ../certbot/www:/var/www/certbot \
           nginx:alpine
-        docker run -it --rm \
+        docker run --rm \
           -v ../certbot/certs:/etc/letsencrypt \
           -v ../certbot/www:/var/www \
           -v ../certbot/log/letsencrypt:/var/log/letsencrypt \
