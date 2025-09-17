@@ -161,13 +161,13 @@ certificates:
           -p 80:80 \
           -v ./dist:/usr/share/nginx/html \
           -v ./frontend/nginx/temp_80_only/nginx.conf:/etc/nginx/nginx.conf:ro \
-          -v ../certbot/certs:/etc/letsencrypt \
-          -v ../certbot/www:/var/www/certbot \
+          -v /home/ubuntu/certbot/certs:/etc/letsencrypt \
+          -v /home/ubuntu/certbot/www:/var/www/certbot \
           nginx:alpine
         docker run --rm \
-          -v ../certbot/certs:/etc/letsencrypt \
-          -v ../certbot/www:/var/www \
-          -v ../certbot/log/letsencrypt:/var/log/letsencrypt \
+          -v /home/ubuntu/certbot/certs:/etc/letsencrypt \
+          -v /home/ubuntu/certbot/www:/var/www \
+          -v /home/ubuntu/certbot/log/letsencrypt:/var/log/letsencrypt \
           certbot/certbot certonly \
           --webroot -w /var/www \
           -d steamednotes.com,www.steamednotes.com \
