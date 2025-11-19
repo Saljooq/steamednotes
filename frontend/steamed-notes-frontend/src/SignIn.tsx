@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import Footer from "./staticPages/Footer";
+import { ResponsivePieCanvas } from '@nivo/pie';
 
 interface FormData {
   email: string;
@@ -41,6 +42,63 @@ const Typewriter: React.FC<{ text: string; speed: number }> = ({ text, speed }) 
     </>
   );
 };
+
+const data: pieData[] = [
+  {
+    "id": "go",
+    "label": "go label",
+    "value": 458
+  },
+  {
+    "id": "java",
+    "label": "java",
+    "value": 267
+  },
+  {
+    "id": "hack",
+    "label": "hack",
+    "value": 198
+  },
+  {
+    "id": "scala",
+    "label": "scala",
+    "value": 561
+  }
+]
+
+interface pieData {
+  id: string;
+  label: string;
+  value: number;
+}
+
+const MyPieCanvas: React.FC<{ data: pieData[] }> = ({ data  }) => (
+    <ResponsivePieCanvas
+        data={data}
+        margin={{ top: 40, right: 200, bottom: 40, left: 80 }}
+        innerRadius={0.5}
+        padAngle={0.6}
+        cornerRadius={2}
+        activeOuterRadiusOffset={8}
+        colors={{ scheme: 'paired' }}
+        arcLinkLabelsSkipAngle={10}
+        arcLinkLabelsTextColor="#333333"
+        arcLinkLabelsThickness={2}
+        arcLinkLabelsColor={{ from: 'color' }}
+        arcLabelsSkipAngle={10}
+        arcLabelsTextColor="#333333"
+        legends={[
+            {
+                anchor: 'right',
+                direction: 'column',
+                translateX: 140,
+                itemsSpacing: 2,
+                itemWidth: 60,
+                itemHeight: 16
+            }
+        ]}
+    />
+)
 
 interface SignInProp {
   setHasSignIn: (hasSignedIn: boolean) => void;
@@ -202,7 +260,10 @@ export const SignIn: React.FC<SignInProp> = ({ setHasSignIn }) => {
           </Link>
         </p>
         <Footer />
+        <MyPieCanvas data={data}/>
       </div>
     </div>
   );
 }
+
+export default SignIn;

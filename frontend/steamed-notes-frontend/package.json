@@ -12,6 +12,7 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@lexical/react": "^0.33.1",
+    "@nivo/pie": "^0.99.0",
     "@tailwindcss/vite": "^4.1.4",
     "lexical": "^0.33.1",
     "react": "^19.0.0",

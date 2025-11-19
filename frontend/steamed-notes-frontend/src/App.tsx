@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { SignIn } from "./SignIn";
+// import { SignIn } from "./SignIn";
 import Terminal from "./terminal/Terminal"
 import SignupForm from "./CreateUser";
 import RoomsScreen from "./Rooms";
@@ -13,6 +13,7 @@ import AdminPage from "./Admin";
 import About from "./staticPages/About";
 import Shortcuts from "./staticPages/Shortcuts";
 import RequireAuth from "./RequireAuth";
+const SignIn = lazy(() => import('./SignIn'));
 
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
 
   return (
     <BrowserRouter>
+    <Suspense fallback={<LoadingScreen msg="Loading..."/>}>
       <Routes>
         <Route
           path="/signin"
@@ -69,6 +71,7 @@ function App() {
         <Route path="/folder/:folderId" element={<RequireAuth isSignedIn={signedIn} hasCheckedSignIn={hasCheckedSignIn}><NotesScreen setLoggedOut={setLoggedOut}/></RequireAuth>} />
 
       </Routes>
+    </Suspense>
     </BrowserRouter>
   )
 }
