@@ -59,7 +59,7 @@ func main() {
 	defer conn.Close()
 
 	queries := db.New(conn)
-	conData := ConnectionData{queries: queries}
+	connData := ConnectionData{queries: queries}
 	conAdminData := ConnectionDataAdmin{queries: queries, pool: conn}
 
 	// List users handler
@@ -98,30 +98,39 @@ func main() {
 		json.NewEncoder(w).Encode(user)
 	})
 
-	http.HandleFunc("GET /api/notes", authMiddleware(conData.getNotes))
-	http.HandleFunc("GET /api/notes/getnote", authMiddleware(conData.getNote))
-	http.HandleFunc("POST /api/notes/create", authMiddleware(conData.createNote))
-	http.HandleFunc("PATCH /api/note/update", authMiddleware(conData.updateNote))
-	http.HandleFunc("DELETE /api/note/delete", authMiddleware(conData.deleteNote))
-	http.HandleFunc("POST /api/signin", conData.signIn)
+	http.HandleFunc("GET /api/notes", authMiddlewareWithDB(queries)(connData.getNotes))
+	http.HandleFunc("GET /api/notes/getnote", authMiddlewareWithDB(queries)(connData.getNote))
+	http.HandleFunc("POST /api/notes/create", authMiddlewareWithDB(queries)(connData.createNote))
+	http.HandleFunc("PATCH /api/note/update", authMiddlewareWithDB(queries)(connData.updateNote))
+	http.HandleFunc("DELETE /api/note/delete", authMiddlewareWithDB(queries)(connData.deleteNote))
+	http.HandleFunc("POST /api/signin", connData.signIn)
 
 	http.HandleFunc("GET /api/users/create", createUser)
-	http.HandleFunc("POST /api/rooms/create", authMiddleware(conData.createRoom))
-	http.HandleFunc("GET /api/rooms/get", authMiddleware(conData.getRooms))
-	http.HandleFunc("GET /api/rooms/getdetails", authMiddleware(conData.getRoomDetails))
-	http.HandleFunc("POST /api/folders/create", authMiddleware(conData.createFolder))
-	http.HandleFunc("GET /api/folders/get", authMiddleware(conData.getFoldersByRoom))
-	http.HandleFunc("GET /api/folders/getdetails", authMiddleware(conData.getFolderDetails))
+	http.HandleFunc("POST /api/rooms/create", authMiddlewareWithDB(queries)(connData.createRoom))
+	http.HandleFunc("GET /api/rooms/get", authMiddlewareWithDB(queries)(connData.getRooms))
+	http.HandleFunc("GET /api/rooms/getdetails", authMiddlewareWithDB(queries)(connData.getRoomDetails))
+	http.HandleFunc("POST /api/folders/create", authMiddlewareWithDB(queries)(connData.createFolder))
+	http.HandleFunc("GET /api/folders/get", authMiddlewareWithDB(queries)(connData.getFoldersByRoom))
+	http.HandleFunc("GET /api/folders/getdetails", authMiddlewareWithDB(queries)(connData.getFolderDetails))
 
-	http.HandleFunc("GET /api/users/issignedin", authMiddleware(isSignedIn))
+	http.HandleFunc("GET /api/users/issignedin", authMiddlewareWithDB(queries)(isSignedIn))
 
-	http.HandleFunc("POST /api/logout", authMiddleware(conData.logout))
+	http.HandleFunc("POST /api/logout", authMiddlewareWithDB(queries)(connData.logout))
+
+	// Session management endpoints
+	http.HandleFunc("GET /api/sessions", authMiddlewareWithDB(queries)(connData.getSessions))
+	http.HandleFunc("DELETE /api/sessions", authMiddlewareWithDB(queries)(connData.deleteSession))
+	http.HandleFunc("DELETE /api/sessions/others", authMiddlewareWithDB(queries)(connData.deleteAllOtherSessions))
+	http.HandleFunc("POST /api/change-password", authMiddlewareWithDB(queries)(connData.changePassword))
 
 	http.HandleFunc("GET /api/export", exportHandler)
 
-	http.HandleFunc("/api/ws", authMiddleware(handleWebSocket))
+	http.HandleFunc("/api/ws", authMiddlewareWithDB(queries)(handleWebSocket))
 
-	http.HandleFunc("POST /api/admin", authMiddleware(conAdminData.adminQuery))
+	http.HandleFunc("POST /api/admin", authMiddlewareWithDB(queries)(conAdminData.adminQuery))
+
+	// Start session cleanup scheduler
+	go StartSessionCleanupScheduler(context.Background(), queries)
 
 	fmt.Println("Server starting on :8080")
 	http.ListenAndServe(":8080", nil)

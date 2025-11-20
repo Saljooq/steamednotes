@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
+import SessionManager from './SessionManager'
+import ChangePassword from './ChangePassword'
 
 type Props = {
   initials?: string
@@ -21,6 +23,8 @@ const getInitials = (name: string): string => {
 
 const UserMenu: React.FC<Props> = ({ initials = getInitials(localStorage.getItem("username") || "?"), onLogout }) => {
   const [open, setOpen] = useState(false)
+  const [showSessionManager, setShowSessionManager] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Close menu on outside click
@@ -44,7 +48,25 @@ const UserMenu: React.FC<Props> = ({ initials = getInitials(localStorage.getItem
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-200 rounded shadow-md z-50">
+        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-md z-50">
+          <button
+            onClick={() => {
+              setShowSessionManager(true)
+              setOpen(false)
+            }}
+            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm border-b border-gray-100"
+          >
+            📱 Sessions
+          </button>
+          <button
+            onClick={() => {
+              setShowChangePassword(true)
+              setOpen(false)
+            }}
+            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm border-b border-gray-100"
+          >
+            🔐 Change Password
+          </button>
           <button
             onClick={onLogout}
             className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
@@ -52,6 +74,14 @@ const UserMenu: React.FC<Props> = ({ initials = getInitials(localStorage.getItem
             Logout
           </button>
         </div>
+      )}
+
+      {showSessionManager && (
+        <SessionManager onClose={() => setShowSessionManager(false)} />
+      )}
+
+      {showChangePassword && (
+        <ChangePassword onClose={() => setShowChangePassword(false)} />
       )}
     </div>
   )

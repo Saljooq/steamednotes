@@ -10,6 +10,15 @@ RETURNING id, username, email, created_at;
 SELECT id, password_hash, username FROM users
 where email=$1;
 
+-- name: FindUserById :one
+SELECT id, password_hash, username, email, created_at FROM users
+WHERE id = $1;
+
+-- name: UpdateUserPassword :exec
+UPDATE users 
+SET password_hash = $2
+WHERE id = $1;
+
 -- -- name: CreateRoom :one
 -- INSERT INTO rooms (name, user_id)
 -- VALUES ($1, $2)

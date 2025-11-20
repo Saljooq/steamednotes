@@ -5,6 +5,8 @@
 package db
 
 import (
+	"net/netip"
+
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -46,4 +48,22 @@ type User struct {
 	Email        string
 	PasswordHash string
 	CreatedAt    pgtype.Timestamp
+}
+
+type UserSession struct {
+	ID             int32
+	UserID         int32
+	SessionToken   string
+	DeviceName     pgtype.Text
+	DeviceType     pgtype.Text
+	BrowserName    pgtype.Text
+	BrowserVersion pgtype.Text
+	OsName         pgtype.Text
+	OsVersion      pgtype.Text
+	IpAddress      *netip.Addr
+	UserAgent      pgtype.Text
+	CreatedAt      pgtype.Timestamp
+	LastUsedAt     pgtype.Timestamp
+	ExpiresAt      pgtype.Timestamp
+	IsActive       pgtype.Bool
 }
