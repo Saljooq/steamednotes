@@ -35,23 +35,49 @@ func ParseUserAgent(userAgent string) DeviceInfo {
 		Type: "desktop",
 	}
 
-	// Detect browser
-	browserPatterns := map[string]string{
-		"Chrome":  `Chrome/(\d+\.\d+)`,
-		"Firefox": `Firefox/(\d+\.\d+)`,
-		"Safari":  `Safari/(\d+\.\d+)`,
-		"Edge":    `Edg/(\d+\.\d+)`,
-		"Opera":   `Opera/(\d+\.\d+)`,
-		"IE":      `MSIE (\d+\.\d+)`,
-	}
-
-	for browser, pattern := range browserPatterns {
-		re := regexp.MustCompile(pattern)
+	// Detect browser - more reliable detection with order of specificity
+	// Check Edge first since it includes Chrome in UA
+	if strings.Contains(userAgent, "Edg/") {
+		re := regexp.MustCompile(`Edg/(\d+\.\d+)`)
 		matches := re.FindStringSubmatch(userAgent)
 		if len(matches) > 1 {
-			info.BrowserName = browser
+			info.BrowserName = "Edge"
 			info.BrowserVersion = matches[1]
-			break
+		}
+	} else if strings.Contains(userAgent, "OPR/") || strings.Contains(userAgent, "Opera/") {
+		re := regexp.MustCompile(`(OPR|Opera)/(\d+\.\d+)`)
+		matches := re.FindStringSubmatch(userAgent)
+		if len(matches) > 1 {
+			info.BrowserName = "Opera"
+			info.BrowserVersion = matches[2]
+		}
+	} else if strings.Contains(userAgent, "Chrome/") && !strings.Contains(userAgent, "Edg/") {
+		re := regexp.MustCompile(`Chrome/(\d+\.\d+)`)
+		matches := re.FindStringSubmatch(userAgent)
+		if len(matches) > 1 {
+			info.BrowserName = "Chrome"
+			info.BrowserVersion = matches[1]
+		}
+	} else if strings.Contains(userAgent, "Firefox/") {
+		re := regexp.MustCompile(`Firefox/(\d+\.\d+)`)
+		matches := re.FindStringSubmatch(userAgent)
+		if len(matches) > 1 {
+			info.BrowserName = "Firefox"
+			info.BrowserVersion = matches[1]
+		}
+	} else if strings.Contains(userAgent, "Safari/") && !strings.Contains(userAgent, "Chrome/") {
+		re := regexp.MustCompile(`Safari/(\d+\.\d+)`)
+		matches := re.FindStringSubmatch(userAgent)
+		if len(matches) > 1 {
+			info.BrowserName = "Safari"
+			info.BrowserVersion = matches[1]
+		}
+	} else if strings.Contains(userAgent, "MSIE") {
+		re := regexp.MustCompile(`MSIE (\d+\.\d+)`)
+		matches := re.FindStringSubmatch(userAgent)
+		if len(matches) > 1 {
+			info.BrowserName = "IE"
+			info.BrowserVersion = matches[1]
 		}
 	}
 
