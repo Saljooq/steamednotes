@@ -25,14 +25,16 @@ WHERE id = $1 AND is_active = true;
 
 -- name: UpdateSessionLastUsed :one
 UPDATE user_sessions 
-SET last_used_at = CURRENT_TIMESTAMP,
-    expires_at = CASE 
-        WHEN expires_at - CURRENT_TIMESTAMP < INTERVAL '6 days' 
-        THEN CURRENT_TIMESTAMP + INTERVAL '7 days'
-        ELSE expires_at
-    END
+SET last_used_at = CURRENT_TIMESTAMP
 WHERE id = $1
-RETURNING *;
+RETURNING id;
+
+-- name: UpdateSessionLastUsedAndExpiry :one
+UPDATE user_sessions 
+SET last_used_at = CURRENT_TIMESTAMP,
+expiry_at = CURRENT_TIMESTAMP + INTERVAL '7 days'
+WHERE id = $1
+RETURNING id;
 
 -- name: GetSessionsByUser :many
 SELECT * FROM user_sessions 

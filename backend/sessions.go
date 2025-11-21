@@ -230,15 +230,25 @@ func ValidateAndUpdateSession(ctx context.Context, queries *db.Queries, token st
 		return db.UserSession{}, http.ErrNoCookie
 	}
 
+	if time.Until(session.ExpiresAt.Time) < (time.Hour * 24 * 5) {
+		updatedSessionid, err := queries.UpdateSessionLastUsedAndExpiry(ctx, session.ID)
+		if err != nil {
+			fmt.Printf("Session update error: %v\n", err)
+			return db.UserSession{}, err
+		}
+		fmt.Printf("Session validated and updated successfully\n")
+		return db.UserSession{ID: updatedSessionid}, nil
+	}
+
 	// Update last used time and extend if needed
-	updatedSession, err := queries.UpdateSessionLastUsed(ctx, session.ID)
+	updatedSessionid, err := queries.UpdateSessionLastUsed(ctx, session.ID)
 	if err != nil {
 		fmt.Printf("Session update error: %v\n", err)
 		return db.UserSession{}, err
 	}
 
 	fmt.Printf("Session validated and updated successfully\n")
-	return updatedSession, nil
+	return db.UserSession{ID: updatedSessionid}, nil
 }
 
 func min(a, b int) int {

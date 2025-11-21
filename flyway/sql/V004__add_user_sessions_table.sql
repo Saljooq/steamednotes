@@ -19,5 +19,3 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_user_sessions_user_id ON user_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_sessions_token ON user_sessions(session_token);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON user_sessions(expires_at);
-CREATE INDEX IF NOT EXISTS idx_user_sessions_last_used_at ON user_sessions(last_used_at);

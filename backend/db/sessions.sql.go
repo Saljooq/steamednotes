@@ -238,35 +238,27 @@ func (q *Queries) GetSessionsByUser(ctx context.Context, userID int32) ([]UserSe
 
 const updateSessionLastUsed = `-- name: UpdateSessionLastUsed :one
 UPDATE user_sessions 
-SET last_used_at = CURRENT_TIMESTAMP,
-    expires_at = CASE 
-        WHEN expires_at - CURRENT_TIMESTAMP < INTERVAL '6 days' 
-        THEN CURRENT_TIMESTAMP + INTERVAL '7 days'
-        ELSE expires_at
-    END
+SET last_used_at = CURRENT_TIMESTAMP
 WHERE id = $1
-RETURNING id, user_id, session_token, device_name, device_type, browser_name, browser_version, os_name, os_version, ip_address, user_agent, created_at, last_used_at, expires_at, is_active
+RETURNING id
 `
 
-func (q *Queries) UpdateSessionLastUsed(ctx context.Context, id int32) (UserSession, error) {
+func (q *Queries) UpdateSessionLastUsed(ctx context.Context, id int32) (int32, error) {
 	row := q.db.QueryRow(ctx, updateSessionLastUsed, id)
-	var i UserSession
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.SessionToken,
-		&i.DeviceName,
-		&i.DeviceType,
-		&i.BrowserName,
-		&i.BrowserVersion,
-		&i.OsName,
-		&i.OsVersion,
-		&i.IpAddress,
-		&i.UserAgent,
-		&i.CreatedAt,
-		&i.LastUsedAt,
-		&i.ExpiresAt,
-		&i.IsActive,
-	)
-	return i, err
+	err := row.Scan(&id)
+	return id, err
+}
+
+const updateSessionLastUsedAndExpiry = `-- name: UpdateSessionLastUsedAndExpiry :one
+UPDATE user_sessions 
+SET last_used_at = CURRENT_TIMESTAMP,
+expiry_at = CURRENT_TIMESTAMP + INTERVAL '7 days'
+WHERE id = $1
+RETURNING id
+`
+
+func (q *Queries) UpdateSessionLastUsedAndExpiry(ctx context.Context, id int32) (int32, error) {
+	row := q.db.QueryRow(ctx, updateSessionLastUsedAndExpiry, id)
+	err := row.Scan(&id)
+	return id, err
 }
