@@ -19,9 +19,10 @@ interface Session {
 
 interface SessionManagerProps {
   onClose: () => void
+  onBack?: () => void
 }
 
-const SessionManager: React.FC<SessionManagerProps> = ({ onClose }) => {
+const SessionManager: React.FC<SessionManagerProps> = ({ onClose, onBack }) => {
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -141,7 +142,7 @@ const SessionManager: React.FC<SessionManagerProps> = ({ onClose }) => {
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+        <div className="bg-yellow-100 rounded-lg p-6 max-w-md w-full mx-4">
           <div className="text-center">Loading sessions...</div>
         </div>
       </div>
@@ -150,9 +151,19 @@ const SessionManager: React.FC<SessionManagerProps> = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+      <div className="bg-yellow-100 rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold">Active Sessions</h2>
+          <div className="flex items-center gap-3">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700 text-sm flex items-center gap-1"
+              >
+                ← Back
+              </button>
+            )}
+            <h2 className="text-xl font-bold">Active Sessions</h2>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
@@ -186,8 +197,8 @@ const SessionManager: React.FC<SessionManagerProps> = ({ onClose }) => {
                 key={session.id}
                 className={`border rounded-lg p-4 ${
                   isCurrentSession(session.id) 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200'
+                    ? 'border-yellow-600 bg-yellow-200' 
+                    : 'border-yellow-300 bg-yellow-50'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -199,7 +210,7 @@ const SessionManager: React.FC<SessionManagerProps> = ({ onClose }) => {
                         {session.device_name || 'Unknown Device'}
                       </span>
                       {isCurrentSession(session.id) && (
-                        <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">
+                        <span className="bg-yellow-600 text-white text-xs px-2 py-1 rounded">
                           Current Session
                         </span>
                       )}
@@ -241,8 +252,8 @@ const SessionManager: React.FC<SessionManagerProps> = ({ onClose }) => {
           </div>
         )}
 
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <p className="text-sm text-gray-500">
+        <div className="mt-6 pt-4 border-t border-yellow-300">
+          <p className="text-sm text-gray-600">
             Sessions are automatically extended to 7 days when you use the app. 
             Sessions expire after 7 days of inactivity.
           </p>

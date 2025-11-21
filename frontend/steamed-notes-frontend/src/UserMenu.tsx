@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import SessionManager from './SessionManager'
-import ChangePassword from './ChangePassword'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 type Props = {
   initials?: string
@@ -23,9 +22,9 @@ const getInitials = (name: string): string => {
 
 const UserMenu: React.FC<Props> = ({ initials = getInitials(localStorage.getItem("username") || "?"), onLogout }) => {
   const [open, setOpen] = useState(false)
-  const [showSessionManager, setShowSessionManager] = useState(false)
-  const [showChangePassword, setShowChangePassword] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   // Close menu on outside click
   useEffect(() => {
@@ -48,40 +47,32 @@ const UserMenu: React.FC<Props> = ({ initials = getInitials(localStorage.getItem
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded shadow-md z-50">
+        <div className="absolute right-0 mt-2 w-48 bg-yellow-100 border border-yellow-300 rounded shadow-md z-50">
           <button
             onClick={() => {
-              setShowSessionManager(true)
+              navigate('/sessions', { state: { from: location.pathname } })
               setOpen(false)
             }}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm border-b border-gray-100"
+            className="w-full text-left px-4 py-2 hover:bg-yellow-200 text-sm border-b border-yellow-200"
           >
             📱 Sessions
           </button>
           <button
             onClick={() => {
-              setShowChangePassword(true)
+              navigate('/change-password', { state: { from: location.pathname } })
               setOpen(false)
             }}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm border-b border-gray-100"
+            className="w-full text-left px-4 py-2 hover:bg-yellow-200 text-sm border-b border-yellow-200"
           >
             🔐 Change Password
           </button>
           <button
             onClick={onLogout}
-            className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+            className="w-full text-left px-4 py-2 hover:bg-yellow-200 text-sm"
           >
             Logout
           </button>
         </div>
-      )}
-
-      {showSessionManager && (
-        <SessionManager onClose={() => setShowSessionManager(false)} />
-      )}
-
-      {showChangePassword && (
-        <ChangePassword onClose={() => setShowChangePassword(false)} />
       )}
     </div>
   )

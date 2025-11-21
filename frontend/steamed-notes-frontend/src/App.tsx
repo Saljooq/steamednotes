@@ -13,6 +13,8 @@ import AdminPage from "./Admin";
 import About from "./staticPages/About";
 import Shortcuts from "./staticPages/Shortcuts";
 import RequireAuth from "./RequireAuth";
+import SessionsPage from "./SessionsPage";
+import ChangePasswordPage from "./ChangePasswordPage";
 
 
 function App() {
@@ -60,6 +62,8 @@ function App() {
         <Route path="/admin" element={<AdminPage/>} />
         <Route path="/about" element={<About/>} />
         <Route path="/shortcuts" element={<Shortcuts/>} />
+        <Route path="/sessions" element={<RequireAuth isSignedIn={signedIn} hasCheckedSignIn={hasCheckedSignIn}><SessionsPage /></RequireAuth>} />
+        <Route path="/change-password" element={<RequireAuth isSignedIn={signedIn} hasCheckedSignIn={hasCheckedSignIn}><ChangePasswordPage /></RequireAuth>} />
 
 
         {/* PROTECTED PATHS BELOW */}
