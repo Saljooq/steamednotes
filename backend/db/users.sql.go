@@ -60,6 +60,32 @@ func (q *Queries) FindUserByEmail(ctx context.Context, email string) (FindUserBy
 	return i, err
 }
 
+const findUserById = `-- name: FindUserById :one
+SELECT id, password_hash, username, email, created_at FROM users
+WHERE id = $1
+`
+
+type FindUserByIdRow struct {
+	ID           int32
+	PasswordHash string
+	Username     string
+	Email        string
+	CreatedAt    pgtype.Timestamp
+}
+
+func (q *Queries) FindUserById(ctx context.Context, id int32) (FindUserByIdRow, error) {
+	row := q.db.QueryRow(ctx, findUserById, id)
+	var i FindUserByIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.PasswordHash,
+		&i.Username,
+		&i.Email,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const listUsers = `-- name: ListUsers :many
 SELECT id, username, email, created_at FROM users ORDER BY created_at DESC
 `
@@ -94,4 +120,20 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE users 
+SET password_hash = $2
+WHERE id = $1
+`
+
+type UpdateUserPasswordParams struct {
+	ID           int32
+	PasswordHash string
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.db.Exec(ctx, updateUserPassword, arg.ID, arg.PasswordHash)
+	return err
 }
