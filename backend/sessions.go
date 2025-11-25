@@ -58,8 +58,22 @@ func ParseUserAgent(userAgent string) DeviceInfo {
 			info.BrowserName = "Chrome"
 			info.BrowserVersion = matches[1]
 		}
+	} else if strings.Contains(userAgent, "CriOS/") && !strings.Contains(userAgent, "Edg/") {
+		re := regexp.MustCompile(`CriOS/(\d+\.\d+)`)
+		matches := re.FindStringSubmatch(userAgent)
+		if len(matches) > 1 {
+			info.BrowserName = "Chrome"
+			info.BrowserVersion = matches[1]
+		}
 	} else if strings.Contains(userAgent, "Firefox/") {
 		re := regexp.MustCompile(`Firefox/(\d+\.\d+)`)
+		matches := re.FindStringSubmatch(userAgent)
+		if len(matches) > 1 {
+			info.BrowserName = "Firefox"
+			info.BrowserVersion = matches[1]
+		}
+	} else if strings.Contains(userAgent, "FxiOS/") {
+		re := regexp.MustCompile(`FxiOS/(\d+\.\d+)`)
 		matches := re.FindStringSubmatch(userAgent)
 		if len(matches) > 1 {
 			info.BrowserName = "Firefox"
@@ -90,7 +104,10 @@ func ParseUserAgent(userAgent string) DeviceInfo {
 		"iOS":     `iPhone OS (\d+[._]\d+)`,
 	}
 
-	for os, pattern := range osPatterns {
+	ordered_os := []string{"iOS", "Android", "Mac", "Windows", "Linux"}
+
+	for _, os := range ordered_os {
+		pattern := osPatterns[os]
 		re := regexp.MustCompile(pattern)
 		matches := re.FindStringSubmatch(userAgent)
 		if len(matches) > 0 {
@@ -101,6 +118,7 @@ func ParseUserAgent(userAgent string) DeviceInfo {
 			break
 		}
 	}
+
 
 	// Determine device type
 	if strings.Contains(strings.ToLower(userAgent), "mobile") ||
