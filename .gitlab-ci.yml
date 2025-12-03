@@ -98,6 +98,7 @@ deploy_to_ec2:
         [ -f /tmp/main ] && cp /tmp/main backend/main || echo "No backend/main to copy"
         [ -d /tmp/dist ] && cp -r /tmp/dist/. dist || echo "No dist to copy"
         [ -d /tmp/certbot ] && cp -r /tmp/certbot/. certbot || echo "No certs to copy"
+        [ -d /home/ubuntu/certbot ] && cp -r /home/ubuntu/certbot/. certbot || echo "No certs to copy"
         chmod +x backend/main
         sudo docker-compose up -d
         docker ps -a
