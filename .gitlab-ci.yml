@@ -147,7 +147,7 @@ certificates:
   extends: .ssh_base
   script:
     - |
-      ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << ENDSSH
+      ssh -i ~/.ssh/steamednotes_key.pem ubuntu@$EC2_HOST << 'ENDSSH'
         set -x
         cd ~/app 
         echo  "Pulling certbot container"
@@ -171,7 +171,7 @@ certificates:
           certbot/certbot certonly \
           --webroot -w /var/www \
           -d steamednotes.com,www.steamednotes.com \
-          -m $EMAIL \
+          -m "$EMAIL" \
           --agree-tos --non-interactive --verbose
         cd ..
       ENDSSH 
