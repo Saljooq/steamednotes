@@ -175,6 +175,7 @@ certificates:
           --agree-tos --non-interactive --verbose
         cd ..
       ENDSSH 
+      cd /home/ubuntu
   artifacts:
     paths:
       - certbot/certs/
