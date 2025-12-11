@@ -26,3 +26,8 @@ variable "hosted_zone_domain_entry" {
   description = "domain for Hosted Zone data"
   default = "steamednotes.com."
 }
+
+variable "domain_identity" {
+  description = "Domain Indentity"
+  default     = "steamednotes.com"
+}

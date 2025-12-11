@@ -1,5 +1,6 @@
 backend/main
 *.exe
 Dev/dbdata/data/*
-/terraform
+/terraform/.terraform
+.terraform.lock.hcl
 backend/steamednotes
